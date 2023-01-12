@@ -31,7 +31,7 @@ var rootCmd = &cobra.Command{
 	Use:   "price-feeder [config-file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "price-feeder is a side-car process for providing on-chain oracle with price data",
-	Long: `A side-car process that validators must run in order to provide 
+	Long: `A side-car process that validators must run in order to provide
 on-chain price oracle with price information. The price-feeder performs
 two primary functions. First, it is responsible for obtaining price information
 from various reliable data sources, e.g. exchanges, and exposing this data via
