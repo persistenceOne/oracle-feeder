@@ -1,0 +1,71 @@
+gas_adjustment = 1.5
+fees = "100uxprt"
+provider_min_override=true
+
+[server]
+listen_addr = "0.0.0.0:7171"
+read_timeout = "20s"
+verbose_cors = true
+write_timeout = "20s"
+
+[[deviation_thresholds]]
+base = "OSMO"
+threshold = "1.5"
+
+
+[[deviation_thresholds]]
+base = "ATOM"
+threshold = "1.5"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "kraken",
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "osmosis",
+  "kraken",
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "OSMO"
+providers = [
+  "osmosis",
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "OSMO"
+providers = [
+  "kraken",
+  "osmosis",
+]
+quote = "USD"
+
+[account]
+address = "persistence1fk57xyyxz89krc3nn5law2xekan84gufzagszw"
+chain_id = "testing"
+validator = "persistencevaloper1fk57xyyxz89krc3nn5law2xekan84guftegdth"
+
+[keyring]
+backend = "test"
+dir = "/tmp/trash/.persistenceCore"
+
+[rpc]
+grpc_endpoint = "localhost:9090"
+rpc_timeout = "100ms"
+tmrpc_endpoint = "http://localhost:26657"
+
+[telemetry]
+service-name = "price-feeder"
+enabled = true
+enable-hostname = true
+enable-hostname-label = true
+enable-service-label = true
+global-labels = [["chain-id", "persistenceCore"]]
+prometheus-retention-time = 100
