@@ -54,12 +54,6 @@ type (
 	coinMarket struct {
 		Name string `json:"name"` // ex: Binance
 	}
-
-	// Response from the osmosis-api REST server.
-	assetPair struct {
-		Base  string `json:"base"`
-		Quote string `json:"quote"`
-	}
 )
 
 func newCurrencyProviderTracker(

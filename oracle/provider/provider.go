@@ -16,9 +16,9 @@ const (
 	providerCandlePeriod = 10 * time.Minute
 
 	Kraken    Name = "kraken"
-	Binance        = "binance"
-	BinanceUS      = "binanceus"
-	Osmosis        = "osmosis"
+	Binance   Name = "binance"
+	BinanceUS Name = "binanceus"
+	Osmosis   Name = "osmosis"
 )
 
 var ping = []byte("ping")

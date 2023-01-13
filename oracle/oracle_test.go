@@ -1,7 +1,6 @@
 package oracle
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -15,48 +14,6 @@ import (
 	"github.com/persistenceOne/oracle-feeder/oracle/provider"
 	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
-
-type mockProvider struct {
-	prices map[string]types.TickerPrice
-}
-
-func (m mockProvider) GetTickerPrices(_ ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
-	return m.prices, nil
-}
-
-func (m mockProvider) GetCandlePrices(_ ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
-	candles := make(map[string][]types.CandlePrice)
-	for pair, price := range m.prices {
-		candles[pair] = []types.CandlePrice{
-			{
-				Price:     price.Price,
-				TimeStamp: provider.PastUnixTime(1 * time.Minute),
-				Volume:    price.Volume,
-			},
-		}
-	}
-	return candles, nil
-}
-
-func (m mockProvider) SubscribeCurrencyPairs(_ ...types.CurrencyPair) error {
-	return nil
-}
-
-type failingProvider struct {
-	prices map[string]types.TickerPrice
-}
-
-func (m failingProvider) GetTickerPrices(_ ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
-	return nil, fmt.Errorf("unable to get ticker prices")
-}
-
-func (m failingProvider) GetCandlePrices(_ ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
-	return nil, fmt.Errorf("unable to get candle prices")
-}
-
-func (m failingProvider) SubscribeCurrencyPairs(_ ...types.CurrencyPair) error {
-	return nil
-}
 
 type OracleTestSuite struct {
 	suite.Suite
@@ -153,4 +110,127 @@ func TestGenerateExchangeRatesString(t *testing.T) {
 			require.Equal(t, tc.expected, out)
 		})
 	}
+}
+
+func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
+	providerPrices := make(provider.AggregatedProviderPrices, 1)
+	providerCandles := make(provider.AggregatedProviderCandles, 1)
+	pair := types.CurrencyPair{
+		Base:  "ATOM",
+		Quote: "USD",
+	}
+
+	atomPrice := sdk.MustNewDecFromStr("29.93")
+	atomVolume := sdk.MustNewDecFromStr("894123.00")
+
+	prices := make(map[string]types.TickerPrice, 1)
+	prices[pair.String()] = types.TickerPrice{
+		Price:  atomPrice,
+		Volume: atomVolume,
+	}
+
+	candles := make(map[string][]types.CandlePrice, 1)
+	candles[pair.String()] = []types.CandlePrice{
+		{
+			Price:     atomPrice,
+			Volume:    atomVolume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+
+	success := SetProviderTickerPricesAndCandles(
+		provider.BinanceUS,
+		providerPrices,
+		providerCandles,
+		prices,
+		candles,
+		pair,
+	)
+
+	require.True(t, success, "It should successfully set the prices")
+	require.Equal(t, atomPrice, providerPrices[provider.BinanceUS][pair.Base].Price)
+	require.Equal(t, atomPrice, providerCandles[provider.BinanceUS][pair.Base][0].Price)
+}
+
+func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
+	success := SetProviderTickerPricesAndCandles(
+		provider.Kraken,
+		make(provider.AggregatedProviderPrices, 1),
+		make(provider.AggregatedProviderCandles, 1),
+		make(map[string]types.TickerPrice, 1),
+		make(map[string][]types.CandlePrice, 1),
+		types.CurrencyPair{
+			Base:  "ATOM",
+			Quote: "USD",
+		},
+	)
+
+	require.False(t, success, "It should failed to set the prices, prices and candle are empty")
+}
+
+func (ots *OracleTestSuite) TestSuccessGetComputedPricesCandles() {
+	providerCandles := make(provider.AggregatedProviderCandles, 1)
+	pair := types.CurrencyPair{
+		Base:  "ATOM",
+		Quote: "USD",
+	}
+
+	atomPrice := sdk.MustNewDecFromStr("29.93")
+	atomVolume := sdk.MustNewDecFromStr("894123.00")
+
+	candles := make(map[string][]types.CandlePrice, 1)
+	candles[pair.Base] = []types.CandlePrice{
+		{
+			Price:     atomPrice,
+			Volume:    atomVolume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[provider.Binance] = candles
+
+	providerPair := map[provider.Name][]types.CurrencyPair{
+		provider.Binance: {pair},
+	}
+
+	prices, err := ots.oracle.GetComputedPrices(
+		providerCandles,
+		make(provider.AggregatedProviderPrices, 1),
+		providerPair,
+		make(map[string]sdk.Dec),
+	)
+
+	require.NoError(ots.T(), err, "It should successfully get computed candle prices")
+	require.Equal(ots.T(), prices[pair.Base], atomPrice)
+}
+
+func (ots *OracleTestSuite) TestSuccessGetComputedPricesTickers() {
+	providerPrices := make(provider.AggregatedProviderPrices, 1)
+	pair := types.CurrencyPair{
+		Base:  "ATOM",
+		Quote: "USD",
+	}
+
+	atomPrice := sdk.MustNewDecFromStr("29.93")
+	atomVolume := sdk.MustNewDecFromStr("894123.00")
+
+	tickerPrices := make(map[string]types.TickerPrice, 1)
+	tickerPrices[pair.Base] = types.TickerPrice{
+		Price:  atomPrice,
+		Volume: atomVolume,
+	}
+	providerPrices[provider.Binance] = tickerPrices
+
+	providerPair := map[provider.Name][]types.CurrencyPair{
+		provider.Binance: {pair},
+	}
+
+	prices, err := ots.oracle.GetComputedPrices(
+		make(provider.AggregatedProviderCandles, 1),
+		providerPrices,
+		providerPair,
+		make(map[string]sdk.Dec),
+	)
+
+	require.NoError(ots.T(), err, "It should successfully get computed ticker prices")
+	require.Equal(ots.T(), prices[pair.Base], atomPrice)
 }

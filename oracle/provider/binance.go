@@ -44,7 +44,7 @@ type (
 	// Unmarshal matches incoming object keys to the keys used by Marshal (either the
 	// struct field name or its tag), preferring an exact match but also accepting a
 	// case-insensitive match. C field which is Statistics close time is not used, but
-	// it avoids to implement specific UnmarshalJSON.
+	// it avoids implementing specific UnmarshalJSON.
 	BinanceTicker struct {
 		Symbol    string `json:"s"` // Symbol ex.: ATOMUSD
 		LastPrice string `json:"c"` // Last price ex.: 0.0025
@@ -65,7 +65,7 @@ type (
 		Metadata BinanceCandleMetadata `json:"k"` // Metadata for candle
 	}
 
-	// BinanceSubscribeMsg Msg to subscribe all the tickers channels.
+	// BinanceSubscriptionMsg Msg to subscribe all the tickers channels.
 	BinanceSubscriptionMsg struct {
 		Method string   `json:"method"` // SUBSCRIBE/UNSUBSCRIBE
 		Params []string `json:"params"` // streams to subscribe ex.: usdatom@ticker

@@ -236,7 +236,8 @@ func (o *Oracle) setPrices(ctx context.Context) error {
 	requiredRates := map[string]struct{}{}
 
 	for providerName, currencyPairs := range o.providerPairs {
-		priceProvider, err := o.getOrSetProvider(ctx, providerName)
+		pn := providerName
+		priceProvider, err := o.getOrSetProvider(ctx, pn)
 		if err != nil {
 			return err
 		}
@@ -245,16 +246,17 @@ func (o *Oracle) setPrices(ctx context.Context) error {
 			requiredRates[pair.Base] = struct{}{}
 		}
 
+		var cp = currencyPairs
 		g.Go(func() error {
-			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
+			prices, err := priceProvider.GetTickerPrices(cp...)
 			if err != nil {
-				provider.TelemetryFailure(providerName, provider.MessageTypeTicker)
+				provider.TelemetryFailure(pn, provider.MessageTypeTicker)
 				return err
 			}
 
-			candles, err := priceProvider.GetCandlePrices(currencyPairs...)
+			candles, err := priceProvider.GetCandlePrices(cp...)
 			if err != nil {
-				provider.TelemetryFailure(providerName, provider.MessageTypeCandle)
+				provider.TelemetryFailure(pn, provider.MessageTypeCandle)
 				return err
 			}
 
@@ -262,8 +264,8 @@ func (o *Oracle) setPrices(ctx context.Context) error {
 			//
 			// e.g.: {Kraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
-			for _, pair := range currencyPairs {
-				success := SetProviderTickerPricesAndCandles(providerName, providerPrices, providerCandles, prices, candles, pair)
+			for _, pair := range cp {
+				success := SetProviderTickerPricesAndCandles(pn, providerPrices, providerCandles, prices, candles, pair)
 				if !success {
 					mtx.Unlock()
 					return fmt.Errorf("failed to find any exchange rates in provider responses")
