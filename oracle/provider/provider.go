@@ -21,6 +21,11 @@ const (
 	Osmosis   Name = "osmosis"
 )
 
+const (
+	messageTypeCandle = string("candle")
+	messageTypeTicker = string("ticker")
+)
+
 var ping = []byte("ping")
 
 type (

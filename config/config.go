@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog"
@@ -61,7 +60,6 @@ type (
 		Account             Account             `mapstructure:"account" validate:"required,gt=0,dive,required"`
 		Keyring             Keyring             `mapstructure:"keyring" validate:"required,gt=0,dive,required"`
 		RPC                 RPC                 `mapstructure:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry           telemetry.Config    `mapstructure:"telemetry"`
 		GasAdjustment       float64             `mapstructure:"gas_adjustment" validate:"required"`
 		ProviderTimeout     string              `mapstructure:"provider_timeout"`
 		ProviderMinOverride bool                `mapstructure:"provider_min_override"`
@@ -115,15 +113,6 @@ type (
 	}
 )
 
-// telemetryValidation is custom validation for the Telemetry struct.
-func telemetryValidation(sl validator.StructLevel) {
-	tel := sl.Current().Interface().(telemetry.Config)
-
-	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0) {
-		sl.ReportError(tel.Enabled, "enabled", "Enabled", "enabledNoOptions", "")
-	}
-}
-
 // endpointValidation is custom validation for the ProviderEndpoint struct.
 func endpointValidation(sl validator.StructLevel) {
 	endpoint := sl.Current().Interface().(provider.Endpoint)
@@ -138,7 +127,6 @@ func endpointValidation(sl validator.StructLevel) {
 
 // Validate returns an error if the Config object is invalid.
 func (c Config) Validate() error {
-	validate.RegisterStructValidation(telemetryValidation, telemetry.Config{})
 	validate.RegisterStructValidation(endpointValidation, provider.Endpoint{})
 	return validate.Struct(c)
 }

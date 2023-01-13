@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
@@ -36,12 +35,6 @@ func (m mockOracle) GetPrices() map[string]sdk.Dec {
 	return mockPrices
 }
 
-type mockMetrics struct{}
-
-func (mockMetrics) Gather(format string) (telemetry.GatherResponse, error) {
-	return telemetry.GatherResponse{}, nil
-}
-
 type RouterTestSuite struct {
 	suite.Suite
 
@@ -59,7 +52,7 @@ func (rts *RouterTestSuite) SetupSuite() {
 		},
 	}
 
-	r := v1.New(zerolog.Nop(), cfg, mockOracle{}, mockMetrics{})
+	r := v1.New(zerolog.Nop(), cfg, mockOracle{})
 	r.RegisterRoutes(mux, v1.APIPathPrefix)
 
 	rts.mux = mux

@@ -251,14 +251,18 @@ func (p *BinanceProvider) messageReceived(_ int, bz []byte) {
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if len(tickerResp.LastPrice) != 0 {
 		p.setTickerPair(tickerResp)
-		telemetryWebsocketMessage(Binance, MessageTypeTicker)
+		p.logger.Trace().
+			Str(Binance.String(), messageTypeTicker).
+			Msg("Websocket message received")
 		return
 	}
 
 	candleErr = json.Unmarshal(bz, &candleResp)
 	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
-		telemetryWebsocketMessage(Binance, MessageTypeCandle)
+		p.logger.Trace().
+			Str(Binance.String(), messageTypeCandle).
+			Msg("Websocket message received")
 		return
 	}
 

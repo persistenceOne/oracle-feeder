@@ -51,7 +51,6 @@ func FilterTickerDeviations(
 
 				filteredPrices[providerName][base] = tp
 			} else {
-				provider.TelemetryFailure(providerName, provider.MessageTypeTicker)
 				logger.Warn().
 					Str("base", base).
 					Str("provider", string(providerName)).
@@ -121,7 +120,6 @@ func filterCandleDeviations(
 
 				filteredCandles[providerName][base] = candles[providerName][base]
 			} else {
-				provider.TelemetryFailure(providerName, provider.MessageTypeCandle)
 				logger.Warn().
 					Str("base", base).
 					Str("provider", string(providerName)).

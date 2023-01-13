@@ -12,7 +12,6 @@ write_timeout = "20s"
 base = "OSMO"
 threshold = "1.5"
 
-
 [[deviation_thresholds]]
 base = "ATOM"
 threshold = "1.5"
@@ -60,12 +59,3 @@ dir = "/tmp/trash/.persistenceCore"
 grpc_endpoint = "localhost:9090"
 rpc_timeout = "100ms"
 tmrpc_endpoint = "http://localhost:26657"
-
-[telemetry]
-service-name = "price-feeder"
-enabled = true
-enable-hostname = true
-enable-hostname-label = true
-enable-service-label = true
-global-labels = [["chain-id", "persistenceCore"]]
-prometheus-retention-time = 100

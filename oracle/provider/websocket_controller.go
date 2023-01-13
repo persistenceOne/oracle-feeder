@@ -128,7 +128,9 @@ func (wsc *WebsocketController) iterateRetryCounter() time.Duration {
 
 // subscribe sends the WebsocketControllers subscription messages to the websocket
 func (wsc *WebsocketController) subscribe(msgs []interface{}) error {
-	telemetryWebsocketSubscribeCurrencyPairs(wsc.providerName, len(wsc.subscriptionMsgs))
+	wsc.logger.Info().
+		Str("provider", wsc.providerName.String()).
+		Msg("websocket subscribed currency_pairs")
 	for _, jsonMessage := range msgs {
 		if err := wsc.SendJSON(jsonMessage); err != nil {
 			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
@@ -256,7 +258,7 @@ func (wsc *WebsocketController) close() {
 func (wsc *WebsocketController) reconnect() {
 	wsc.close()
 	go wsc.Start()
-	telemetryWebsocketReconnect(wsc.providerName)
+	wsc.logger.Debug().Msg("Reconnecting websocket")
 }
 
 // pingHandler is called by the websocket library whenever a ping message is received

@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
@@ -146,14 +145,9 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		endpoints,
 	)
 
-	metrics, err := telemetry.New(cfg.Telemetry)
-	if err != nil {
-		return err
-	}
-
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices
-		return startPriceFeeder(ctx, logger, cfg, oracle, metrics)
+		return startPriceFeeder(ctx, logger, cfg, oracle)
 	})
 	g.Go(func() error {
 		// start the process that calculates oracle prices and votes
@@ -180,10 +174,9 @@ func startPriceFeeder(
 	logger zerolog.Logger,
 	cfg config.Config,
 	oracle *oracle.Oracle,
-	metrics *telemetry.Metrics,
 ) error {
 	rtr := mux.NewRouter()
-	v1Router := v1.New(logger, cfg, oracle, metrics)
+	v1Router := v1.New(logger, cfg, oracle)
 	v1Router.RegisterRoutes(rtr, v1.APIPathPrefix)
 
 	writeTimeout, err := time.ParseDuration(cfg.Server.WriteTimeout)

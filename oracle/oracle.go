@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
@@ -124,16 +123,11 @@ returns an error, it increments a counter for failures and logs the error messag
 
  - It sets the value of the lastPriceSyncTS variable to the current time.
 
- - It tracks the runtime of the tick using the MeasureSince function of the telemetry package.
-And increment a counter for new tick.
-
  - It sleeps for a period of time defined by the tickerTimeout variable.
 
 It is likely that this function is designed to run continuously in the background and periodically
 update some sort of price data which is being used by the smart contract. The executeTick function
 which is being called inside the loop could be doing the price fetching and updating job.
-The telemetry part of the code is likely tracking some sort of performance metric or error rate related
-to the oracle.
 */
 
 // Start starts the oracle process in a blocking fashion.
@@ -146,18 +140,13 @@ func (o *Oracle) Start(ctx context.Context) error {
 		default:
 			o.logger.Debug().Msg("starting oracle tick")
 
-			startTime := time.Now()
-
 			if err := o.executeTick(ctx); err != nil {
-				telemetry.IncrCounter(1, "failure", "tick")
 				o.logger.Err(err).Msg("oracle tick failed")
 			}
 
 			o.lastPriceSyncTS = time.Now()
 
-			telemetry.MeasureSince(startTime, "runtime", "tick")
-			telemetry.IncrCounter(1, "new", "tick")
-
+			o.logger.Debug().Msg("New tick")
 			time.Sleep(tickerTimeout)
 		}
 	}
@@ -250,13 +239,11 @@ func (o *Oracle) setPrices(ctx context.Context) error {
 		g.Go(func() error {
 			prices, err := priceProvider.GetTickerPrices(cp...)
 			if err != nil {
-				provider.TelemetryFailure(pn, provider.MessageTypeTicker)
 				return err
 			}
 
 			candles, err := priceProvider.GetCandlePrices(cp...)
 			if err != nil {
-				provider.TelemetryFailure(pn, provider.MessageTypeCandle)
 				return err
 			}
 

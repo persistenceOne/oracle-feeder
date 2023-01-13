@@ -3,7 +3,6 @@ module github.com/persistenceOne/oracle-feeder
 go 1.19
 
 require (
-	github.com/armon/go-metrics v0.4.1
 	github.com/cosmos/cosmos-sdk v0.45.11
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gorilla/mux v1.8.0
@@ -33,6 +32,7 @@ require (
 	github.com/CosmWasm/wasmd v0.29.2 // indirect
 	github.com/CosmWasm/wasmvm v1.1.1 // indirect
 	github.com/Workiva/go-datastructures v1.0.53 // indirect
+	github.com/armon/go-metrics v0.4.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/btcsuite/btcd v0.22.1 // indirect

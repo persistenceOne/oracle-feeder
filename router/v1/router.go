@@ -1,9 +1,7 @@
 package v1
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -23,15 +21,13 @@ type Router struct {
 	logger  zerolog.Logger
 	cfg     config.Config
 	oracle  Oracle
-	metrics Metrics
 }
 
-func New(logger zerolog.Logger, cfg config.Config, oracle Oracle, metrics Metrics) *Router {
+func New(logger zerolog.Logger, cfg config.Config, oracle Oracle) *Router {
 	return &Router{
 		logger:  logger.With().Str("module", "router").Logger(),
 		cfg:     cfg,
 		oracle:  oracle,
-		metrics: metrics,
 	}
 }
 
@@ -61,10 +57,6 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 		mChain.ThenFunc(r.pricesHandler()),
 	).Methods(httputil.MethodGET)
 
-	v1Router.Handle(
-		"/metrics",
-		mChain.ThenFunc(r.metricsHandler()),
-	).Methods(httputil.MethodGET)
 }
 
 func (r *Router) healthzHandler() http.HandlerFunc {
@@ -86,20 +78,5 @@ func (r *Router) pricesHandler() http.HandlerFunc {
 		}
 
 		httputil.RespondWithJSON(w, http.StatusOK, resp)
-	}
-}
-
-func (r *Router) metricsHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		format := strings.TrimSpace(req.FormValue("format"))
-
-		gr, err := r.metrics.Gather(format)
-		if err != nil {
-			writeErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("failed to gather metrics: %s", err))
-			return
-		}
-
-		w.Header().Set("Content-Type", gr.ContentType)
-		_, _ = w.Write(gr.Metrics)
 	}
 }
