@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 const (
@@ -93,12 +92,6 @@ func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
 }
 
-// PastUnixTime returns a second timestamp that represents the unix time
-// minus t.
-func pastUnixTimeInSeconds(t time.Duration) int64 {
-	return time.Now().Add(t*-1).Unix() * int64(time.Second)
-}
-
 // secondsToMilli converts seconds to milliseconds for our unix timestamps.
 func secondsToMilli(t int64) int64 {
 	return t * int64(time.Second/time.Millisecond)
@@ -109,17 +102,6 @@ func checkHTTPStatus(resp *http.Response) error {
 		return fmt.Errorf("unexpected status: %s", resp.Status)
 	}
 	return nil
-}
-
-func strToDec(str string) sdk.Dec {
-	if strings.Contains(str, ".") {
-		split := strings.Split(str, ".")
-		if len(split[1]) > 18 {
-			// sdk.MustNewDecFromStr will panic if decimal precision is greater than 18
-			str = split[0] + "." + split[1][0:18]
-		}
-	}
-	return sdk.MustNewDecFromStr(str)
 }
 
 func floatToDec(f float64) sdk.Dec {

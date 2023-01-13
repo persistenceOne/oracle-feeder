@@ -7,9 +7,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/persistence/oracle-feeder/oracle"
-	"github.com/persistence/oracle-feeder/oracle/provider"
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/oracle"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 func TestComputeVWAP(t *testing.T) {

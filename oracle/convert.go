@@ -7,9 +7,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 
-	"github.com/persistence/oracle-feeder/config"
-	"github.com/persistence/oracle-feeder/oracle/provider"
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/config"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 // getUSDBasedProviders retrieves which providers for an asset have a USD-based pair,

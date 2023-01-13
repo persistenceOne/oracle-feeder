@@ -13,8 +13,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/persistence/oracle-feeder/config"
-	v1 "github.com/persistence/oracle-feeder/router/v1"
+	"github.com/persistenceOne/oracle-feeder/config"
+	v1 "github.com/persistenceOne/oracle-feeder/router/v1"
 )
 
 var (

@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 
-	"github.com/persistence/oracle-feeder/config"
+	"github.com/persistenceOne/oracle-feeder/config"
 )
 
 func Build(logger zerolog.Logger, cfg config.Config) alice.Chain {

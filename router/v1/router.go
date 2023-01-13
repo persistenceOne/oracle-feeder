@@ -9,9 +9,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 
-	"github.com/persistence/oracle-feeder/config"
-	"github.com/persistence/oracle-feeder/pkg/httputil"
-	"github.com/persistence/oracle-feeder/router/middleware"
+	"github.com/persistenceOne/oracle-feeder/config"
+	"github.com/persistenceOne/oracle-feeder/pkg/httputil"
+	"github.com/persistenceOne/oracle-feeder/router/middleware"
 )
 
 const (

@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 
-	"github.com/persistence/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
 )
 
 const (
@@ -93,7 +93,7 @@ type (
 		Threshold string `mapstructure:"threshold" validate:"required"`
 	}
 
-	// Account defines account related configuration that is related to the persistence
+	// Account defines account related configuration that is related to the persistenceOne
 	// network and transaction signing functionality.
 	Account struct {
 		ChainID   string `mapstructure:"chain_id" validate:"required"`
@@ -101,13 +101,13 @@ type (
 		Validator string `mapstructure:"validator" validate:"required"`
 	}
 
-	// Keyring defines the required persistence keyring configuration.
+	// Keyring defines the required persistenceOne keyring configuration.
 	Keyring struct {
 		Backend string `mapstructure:"backend" validate:"required"`
 		Dir     string `mapstructure:"dir" validate:"required"`
 	}
 
-	// RPC defines RPC configuration of both the persistence gRPC and Tendermint nodes.
+	// RPC defines RPC configuration of both the persistenceOne gRPC and Tendermint nodes.
 	RPC struct {
 		TMRPCEndpoint string `mapstructure:"tmrpc_endpoint" validate:"required"`
 		GRPCEndpoint  string `mapstructure:"grpc_endpoint" validate:"required"`

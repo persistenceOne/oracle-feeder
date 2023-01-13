@@ -8,8 +8,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 
-	"github.com/persistence/oracle-feeder/oracle/provider"
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 var (

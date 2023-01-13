@@ -1,4 +1,4 @@
-module github.com/persistence/oracle-feeder
+module github.com/persistenceOne/oracle-feeder
 
 go 1.19
 

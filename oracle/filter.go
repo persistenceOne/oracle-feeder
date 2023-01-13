@@ -4,8 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 
-	"github.com/persistence/oracle-feeder/oracle/provider"
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 // defaultDeviationThreshold defines how many 𝜎 a provider can be away

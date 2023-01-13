@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/persistence/oracle-feeder/config"
-	"github.com/persistence/oracle-feeder/oracle/client"
-	"github.com/persistence/oracle-feeder/oracle/provider"
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/config"
+	"github.com/persistenceOne/oracle-feeder/oracle/client"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 type mockProvider struct {

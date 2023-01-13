@@ -15,12 +15,12 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/persistence/oracle-feeder/oracle/provider"
-	v1 "github.com/persistence/oracle-feeder/router/v1"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
+	v1 "github.com/persistenceOne/oracle-feeder/router/v1"
 
-	"github.com/persistence/oracle-feeder/config"
-	"github.com/persistence/oracle-feeder/oracle"
-	"github.com/persistence/oracle-feeder/oracle/client"
+	"github.com/persistenceOne/oracle-feeder/config"
+	"github.com/persistenceOne/oracle-feeder/oracle"
+	"github.com/persistenceOne/oracle-feeder/oracle/client"
 )
 
 const (

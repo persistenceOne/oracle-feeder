@@ -18,14 +18,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/persistence/oracle-feeder/config"
-	"github.com/persistence/oracle-feeder/oracle/provider"
-	"github.com/persistence/oracle-feeder/oracle/types"
-	pfsync "github.com/persistence/oracle-feeder/pkg/sync"
+	"github.com/persistenceOne/oracle-feeder/config"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
+	pfsync "github.com/persistenceOne/oracle-feeder/pkg/sync"
 
 	oracletypes "github.com/persistenceOne/persistence-sdk/x/oracle/types"
 
-	"github.com/persistence/oracle-feeder/oracle/client"
+	"github.com/persistenceOne/oracle-feeder/oracle/client"
 )
 
 var (

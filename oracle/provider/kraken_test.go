@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 func TestKrakenProvider_GetTickerPrices(t *testing.T) {

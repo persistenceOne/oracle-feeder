@@ -1,6 +1,6 @@
 package main
 
-import "github.com/persistence/oracle-feeder/cmd"
+import "github.com/persistenceOne/oracle-feeder/cmd"
 
 func main() {
 	cmd.Execute()

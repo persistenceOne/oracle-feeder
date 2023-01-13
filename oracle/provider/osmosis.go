@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 const (

@@ -7,7 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/persistence/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
 )
 
 var (

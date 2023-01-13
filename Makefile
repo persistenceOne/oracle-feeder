@@ -23,9 +23,9 @@ endif
 ##                              Build / Install                              ##
 ###############################################################################
 
-ldflags = -X github.com/persistence/oracle-feeder/cmd.Version=$(VERSION) \
-		  -X github.com/persistence/oracle-feeder/cmd.Commit=$(COMMIT) \
-		  -X github.com/persistence/oracle-feeder/cmd.SDKVersion=$(SDK_VERSION)
+ldflags = -X github.com/persistenceOne/oracle-feeder/cmd.Version=$(VERSION) \
+		  -X github.com/persistenceOne/oracle-feeder/cmd.Commit=$(COMMIT) \
+		  -X github.com/persistenceOne/oracle-feeder/cmd.SDKVersion=$(SDK_VERSION)
 
 ifeq ($(LINK_STATICALLY),true)
 	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"

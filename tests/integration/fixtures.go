@@ -1,8 +1,8 @@
 package integration
 
 import (
-	"github.com/persistence/oracle-feeder/oracle/provider"
-	"github.com/persistence/oracle-feeder/oracle/types"
+	"github.com/persistenceOne/oracle-feeder/oracle/provider"
+	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
 var ProviderAndCurrencyPairsFixture = []struct {
