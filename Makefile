@@ -35,6 +35,11 @@ build_tags += $(BUILD_TAGS)
 
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
+.PHONY: ci
+ci: ## CI job in GitHub
+ci: clean install generate vet fmt lint test mod-tidy diff
+
+
 build: go.sum
 	@echo "--> Building..."
 	go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
