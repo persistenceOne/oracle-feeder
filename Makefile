@@ -37,8 +37,17 @@ BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 .PHONY: ci
 ci: ## CI job in GitHub
-ci: clean install generate vet fmt lint test mod-tidy diff
+ci: clean install lint mod-tidy test-unit
 
+.PHONY: clean
+clean: ## remove files created during build pipeline
+	$(call print-target)
+	rm -rf build
+
+.PHONY: mod-tidy
+mod-tidy: ## go mod tidy
+	$(call print-target)
+	go mod tidy
 
 build: go.sum
 	@echo "--> Building..."
@@ -66,6 +75,5 @@ integration-test:
 	@go test ./tests/integration -count=1 -mod=readonly ./... -v
 
 .PHONY: lint
-lint:
-	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
+lint: ## golangci-lint
+	golangci-lint run
