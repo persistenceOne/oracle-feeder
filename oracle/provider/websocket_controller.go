@@ -119,7 +119,7 @@ func (wsc *WebsocketController) connect() error {
 }
 
 func (wsc *WebsocketController) iterateRetryCounter() time.Duration {
-	if wsc.reconnectCounter < 25 {
+	if wsc.reconnectCounter < 25 { //nolint:gomnd //no need to make const
 		wsc.reconnectCounter++
 	}
 	multiplier := math.Pow(float64(wsc.reconnectCounter), 2) //nolint: gomnd //const

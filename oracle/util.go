@@ -154,7 +154,7 @@ func ComputeStandardDeviationsAndMeans(prices map[provider.Name]map[string]sdk.D
 	}
 
 	for asset, sum := range priceSums {
-		if len(priceSlice[asset]) < 3 {
+		if len(priceSlice[asset]) < 3 { //nolint:gomnd //no need to make const
 			continue
 		}
 
