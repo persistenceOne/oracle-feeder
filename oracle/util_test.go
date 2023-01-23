@@ -81,7 +81,7 @@ func TestComputeVWAP(t *testing.T) {
 	}
 }
 
-//nolint:funlen //test
+//nolint:dupl,funlen //test
 func TestComputeTVWAP(t *testing.T) {
 	testCases := map[string]struct {
 		candles  provider.AggregatedProviderCandles
