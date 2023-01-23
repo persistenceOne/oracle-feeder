@@ -286,7 +286,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 		return err
 	}
 
-	if len(tickerMessage) != 4 { //nolint:gomnd //no need to make const
+	if len(tickerMessage) != 4 {
 		return fmt.Errorf("received an unexpected structure")
 	}
 
@@ -334,7 +334,7 @@ func (candle *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	if err := json.Unmarshal(buf, &tmp); err != nil {
 		return err
 	}
-	if len(tmp) != 9 { //nolint:gomnd //no need to make const
+	if len(tmp) != 9 {
 		return fmt.Errorf("wrong number of fields in candle")
 	}
 
@@ -343,7 +343,7 @@ func (candle *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	if !ok {
 		return fmt.Errorf("time field must be a string")
 	}
-	timeFloat, err := strconv.ParseFloat(time, 64) //nolint:gomnd //no need to make const
+	timeFloat, err := strconv.ParseFloat(time, 64)
 	if err != nil {
 		return fmt.Errorf("unable to convert time to float")
 	}
@@ -373,7 +373,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 		return err
 	}
 
-	if len(candleMessage) != 4 { //nolint:gomnd //no need to make const
+	if len(candleMessage) != 4 {
 		return fmt.Errorf("received something different than candle")
 	}
 
