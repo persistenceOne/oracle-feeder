@@ -142,7 +142,7 @@ func NewBinanceProvider(
 }
 
 func (p *BinanceProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
-	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2) //nolint:gomnd //no need to make const
+	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
 	for _, cp := range cps {
 		binanceTickerPair := currencyPairToBinanceTickerPair(cp)
 		subscriptionMsgs = append(subscriptionMsgs, newBinanceSubscriptionMsg(binanceTickerPair))

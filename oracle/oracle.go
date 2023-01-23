@@ -489,7 +489,7 @@ func (o *Oracle) executeTick(ctx context.Context) error {
 		return nil
 	}
 
-	salt, err := generateSalt(32) //nolint:gomnd //no need to make const
+	salt, err := generateSalt(32)
 	if err != nil {
 		return err
 	}
@@ -626,7 +626,7 @@ func (o *Oracle) getParams(ctx context.Context) (oracletypes.Params, error) {
 	defer grpcConn.Close()
 	queryClient := oracletypes.NewQueryClient(grpcConn)
 
-	ctx, cancel := context.WithTimeout(ctx, 15*time.Second) //nolint:gomnd //no need to make const
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
 	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParamsRequest{})
