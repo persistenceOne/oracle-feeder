@@ -48,11 +48,11 @@ type (
 	Name string
 
 	// AggregatedProviderPrices defines a type alias for a map
-	// of provider -> asset -> TickerPrice
+	// of provider -> asset -> TickerPrice.
 	AggregatedProviderPrices map[Name]map[string]types.TickerPrice
 
 	// AggregatedProviderCandles defines a type alias for a map
-	// of provider -> asset -> []types.CandlePrice
+	// of provider -> asset -> []types.CandlePrice.
 	AggregatedProviderCandles map[Name]map[string][]types.CandlePrice
 
 	// Endpoint defines an override setting in our config for the
@@ -110,5 +110,5 @@ func checkHTTPStatus(resp *http.Response) error {
 }
 
 func floatToDec(f float64) sdk.Dec {
-	return sdk.MustNewDecFromStr(strconv.FormatFloat(f, 'f', -1, 64))
+	return sdk.MustNewDecFromStr(strconv.FormatFloat(f, 'f', -1, 64)) //nolint: gomnd //const
 }

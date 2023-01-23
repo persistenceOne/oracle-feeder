@@ -29,8 +29,8 @@ func connect(protoAddr string) (net.Conn, error) {
 func protocolAndAddress(listenAddr string) (string, string) {
 	protocol, address := protocolStr, listenAddr
 
-	parts := strings.SplitN(address, "://", 2)
-	if len(parts) == 2 {
+	parts := strings.SplitN(address, "://", 2) //nolint:gomnd //no need to make const
+	if len(parts) == 2 {                       //nolint:gomnd //no need to make const
 		protocol, address = parts[0], parts[1]
 	}
 

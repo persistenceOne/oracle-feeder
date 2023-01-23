@@ -115,8 +115,11 @@ type (
 
 // endpointValidation is custom validation for the ProviderEndpoint struct.
 func endpointValidation(sl validator.StructLevel) {
-	endpoint := sl.Current().Interface().(provider.Endpoint)
-
+	endpoint, ok := sl.Current().Interface().(provider.Endpoint)
+	if !ok {
+		sl.ReportError(endpoint, "endpoint", "Endpoint", "unsupportedEndpointType", "")
+		return
+	}
 	if len(endpoint.Name) < 1 || len(endpoint.Rest) < 1 || len(endpoint.Websocket) < 1 {
 		sl.ReportError(endpoint, "endpoint", "Endpoint", "unsupportedEndpointType", "")
 	}
@@ -133,6 +136,8 @@ func (c Config) Validate() error {
 
 // ParseConfig attempts to read and parse configuration from the given file path.
 // An error is returned if reading or parsing the config fails.
+//
+//nolint:funlen //No need to split this function
 func ParseConfig(configPath string) (Config, error) {
 	var cfg Config
 

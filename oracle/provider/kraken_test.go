@@ -12,6 +12,7 @@ import (
 	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
+//nolint:funlen // test
 func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewKrakenProvider(
 		context.TODO(),
@@ -106,7 +107,8 @@ func TestKrakenProvider_getSubscriptionMsgs(t *testing.T) {
 	subMsgs := provider.getSubscriptionMsgs(cps...)
 
 	msg, _ := json.Marshal(subMsgs[0])
-	require.Equal(t, "{\"event\":\"subscribe\",\"pair\":[\"ATOM/USD\"],\"subscription\":{\"name\":\"ticker\"}}", string(msg))
+	require.Equal(t, "{\"event\":\"subscribe\",\"pair\":[\"ATOM/USD\"],\"subscription\":{\"name\":\"ticker\"}}",
+		string(msg))
 
 	msg, _ = json.Marshal(subMsgs[1])
 	require.Equal(t, "{\"event\":\"subscribe\",\"pair\":[\"ATOM/USD\"],\"subscription\":{\"name\":\"ohlc\"}}", string(msg))

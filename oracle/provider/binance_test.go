@@ -12,6 +12,7 @@ import (
 	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
+//nolint:funlen // test
 func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewBinanceProvider(
 		context.TODO(),

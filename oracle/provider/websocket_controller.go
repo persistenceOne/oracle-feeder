@@ -25,7 +25,7 @@ type (
 	MessageHandler func(int, []byte)
 
 	// WebsocketController defines a provider agnostic websocket handler
-	// that manages reconnecting, subscribing, and receiving messages
+	// that manages reconnecting, subscribing, and receiving messages.
 	WebsocketController struct {
 		parentCtx           context.Context
 		websocketCtx        context.Context
@@ -71,7 +71,7 @@ func NewWebsocketController(
 // Start will continuously loop and attempt connecting to the websocket
 // until a successful connection is made. It then starts the ping
 // service and read listener in new go routines and sends subscription
-// messages  using the passed in subscription messages
+// messages  using the passed in subscription messages.
 func (wsc *WebsocketController) Start() {
 	connectTicker := time.NewTicker(time.Millisecond)
 	defer connectTicker.Stop()
@@ -100,7 +100,7 @@ func (wsc *WebsocketController) Start() {
 	}
 }
 
-// connect dials the websocket and sets the client to the established connection
+// connect dials the websocket and sets the client to the established connection.
 func (wsc *WebsocketController) connect() error {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
@@ -119,14 +119,14 @@ func (wsc *WebsocketController) connect() error {
 }
 
 func (wsc *WebsocketController) iterateRetryCounter() time.Duration {
-	if wsc.reconnectCounter < 25 {
+	if wsc.reconnectCounter < 25 { //nolint:gomnd //no need to make const
 		wsc.reconnectCounter++
 	}
-	multiplier := math.Pow(float64(wsc.reconnectCounter), 2)
+	multiplier := math.Pow(float64(wsc.reconnectCounter), 2) //nolint: gomnd //const
 	return startingReconnectDuration * time.Duration(multiplier)
 }
 
-// subscribe sends the WebsocketControllers subscription messages to the websocket
+// subscribe sends the WebsocketControllers subscription messages to the websocket.
 func (wsc *WebsocketController) subscribe(msgs []interface{}) error {
 	wsc.logger.Info().
 		Str("provider", wsc.providerName.String()).
@@ -140,10 +140,9 @@ func (wsc *WebsocketController) subscribe(msgs []interface{}) error {
 }
 
 // AddSubscriptionMsgs immediately sends the new subscription messages and
-// adds them to the subscriptionMsgs array if successful
+// adds them to the subscriptionMsgs array if successful.
 func (wsc *WebsocketController) AddSubscriptionMsgs(msgs []interface{}) error {
-	err := wsc.subscribe(msgs)
-	if err != nil {
+	if err := wsc.subscribe(msgs); err != nil {
 		return err
 	}
 	wsc.subscriptionMsgs = append(wsc.subscriptionMsgs, msgs...)
@@ -151,7 +150,7 @@ func (wsc *WebsocketController) AddSubscriptionMsgs(msgs []interface{}) error {
 }
 
 // SendJSON sends a json message to the websocket connection using the Websocket
-// Controller mutex to ensure multiple writes do not happen at once
+// Controller mutex to ensure multiple writes do not happen at once.
 func (wsc *WebsocketController) SendJSON(msg interface{}) error {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
@@ -166,7 +165,7 @@ func (wsc *WebsocketController) SendJSON(msg interface{}) error {
 	return nil
 }
 
-// ping sends a ping to the server every defaultPingDuration
+// ping sends a ping to the server every defaultPingDuration.
 func (wsc *WebsocketController) pingLoop() {
 	if wsc.pingInterval == disabledPingDuration {
 		return // disable ping loop if disabledPingDuration
@@ -206,7 +205,7 @@ func (wsc *WebsocketController) ping() error {
 // to the passed in messageHandler. On websocket error this function
 // terminates and starts the reconnect process.
 // Some providers (Binance) will only allow a valid connection for 24 hours
-// so we manually disconnect and reconnect every 23 hours (defaultMaxConnectionTime)
+// so we manually disconnect and reconnect every 23 hours (defaultMaxConnectionTime).
 func (wsc *WebsocketController) readWebSocket() {
 	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
 	defer reconnectTicker.Stop()
@@ -241,7 +240,7 @@ func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
 	wsc.messageHandler(messageType, bz)
 }
 
-// close sends a close message to the websocket and sets the client to nil
+// close sends a close message to the websocket and sets the client to nil.
 func (wsc *WebsocketController) close() {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
@@ -254,7 +253,7 @@ func (wsc *WebsocketController) close() {
 	wsc.client = nil
 }
 
-// reconnect closes the current websocket and starts a new connection process
+// reconnect closes the current websocket and starts a new connection process.
 func (wsc *WebsocketController) reconnect() {
 	wsc.close()
 	go wsc.Start()
@@ -262,7 +261,7 @@ func (wsc *WebsocketController) reconnect() {
 }
 
 // pingHandler is called by the websocket library whenever a ping message is received
-// and responds with a pong message to the server
+// and responds with a pong message to the server.
 func (wsc *WebsocketController) pingHandler(string) error {
 	if err := wsc.client.WriteMessage(websocket.PongMessage, []byte("pong")); err != nil {
 		wsc.logger.Error().Err(err).Msg("error sending pong")

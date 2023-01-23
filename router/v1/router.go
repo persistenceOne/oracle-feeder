@@ -18,16 +18,16 @@ const (
 
 // Router defines a router wrapper used for registering v1 API routes.
 type Router struct {
-	logger  zerolog.Logger
-	cfg     config.Config
-	oracle  Oracle
+	logger zerolog.Logger
+	cfg    config.Config
+	oracle Oracle
 }
 
 func New(logger zerolog.Logger, cfg config.Config, oracle Oracle) *Router {
 	return &Router{
-		logger:  logger.With().Str("module", "router").Logger(),
-		cfg:     cfg,
-		oracle:  oracle,
+		logger: logger.With().Str("module", "router").Logger(),
+		cfg:    cfg,
+		oracle: oracle,
 	}
 }
 
@@ -42,7 +42,8 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 	v1Router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		w.Header().Set("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, "+
+			"Authorization, X-Requested-With")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.WriteHeader(http.StatusOK)
 	})
@@ -56,7 +57,6 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 		"/prices",
 		mChain.ThenFunc(r.pricesHandler()),
 	).Methods(httputil.MethodGET)
-
 }
 
 func (r *Router) healthzHandler() http.HandlerFunc {

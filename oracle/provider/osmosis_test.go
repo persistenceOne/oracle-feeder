@@ -11,13 +11,7 @@ import (
 	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
-func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
-	p := NewOsmosisProvider(Endpoint{})
-
-	t.Run("valid_request_single_ticker", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/tokens/v2/all", req.URL.String())
-			resp := `[
+const RESP = `[
 				{
 					"price": 100.22,
 					"denom": "ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0",
@@ -36,6 +30,15 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 				}
 			]
 			`
+
+//nolint:funlen // test
+func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
+	p := NewOsmosisProvider(Endpoint{})
+
+	t.Run("valid_request_single_ticker", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			require.Equal(t, "/tokens/v2/all", req.URL.String())
+			resp := RESP
 			_, err := rw.Write([]byte(resp))
 			require.NoError(t, err)
 		}))
@@ -54,25 +57,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			require.Equal(t, "/tokens/v2/all", req.URL.String())
-			resp := `[
-				{
-					"price": 100.22,
-					"denom": "ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0",
-					"symbol": "OSMO",
-					"liquidity": 56928301.60178607,
-					"volume_24h": 7047660.837452592,
-					"name": "Osmosis"
-				},
-				{
-					"price": 28.52,
-					"denom": "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
-					"symbol": "ATOM",
-					"liquidity": 189672157.83693966,
-					"volume_24h": 17006018.613512218,
-					"name": "Cosmos"
-				}
-			]
-			`
+			resp := RESP
 			_, err := rw.Write([]byte(resp))
 			require.NoError(t, err)
 		}))
@@ -112,25 +97,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			require.Equal(t, "/tokens/v2/all", req.URL.String())
-			resp := `[
-				{
-					"price": 100.22,
-					"denom": "ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0",
-					"symbol": "OSMO",
-					"liquidity": 56928301.60178607,
-					"volume_24h": 7047660.837452592,
-					"name": "Osmosis"
-				},
-				{
-					"price": 28.52,
-					"denom": "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
-					"symbol": "ATOM",
-					"liquidity": 189672157.83693966,
-					"volume_24h": 17006018.613512218,
-					"name": "Cosmos"
-				}
-			]
-			`
+			resp := RESP
 			_, err := rw.Write([]byte(resp))
 			require.NoError(t, err)
 		}))

@@ -12,6 +12,7 @@ import (
 	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
+//nolint:funlen //test
 func TestComputeVWAP(t *testing.T) {
 	testCases := map[string]struct {
 		prices   map[provider.Name]map[string]types.TickerPrice
@@ -80,6 +81,7 @@ func TestComputeVWAP(t *testing.T) {
 	}
 }
 
+//nolint:funlen //test
 func TestComputeTVWAP(t *testing.T) {
 	testCases := map[string]struct {
 		candles  provider.AggregatedProviderCandles
@@ -256,6 +258,7 @@ func TestComputeTVWAP(t *testing.T) {
 	}
 }
 
+//nolint:funlen //test
 func TestStandardDeviation(t *testing.T) {
 	type deviation struct {
 		mean      sdk.Dec

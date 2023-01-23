@@ -6,6 +6,7 @@ import (
 
 const ModuleName = "price-feeder"
 
+//nolint:gomnd //const
 var (
 	ErrMissingExchangeRate = sdkerrors.Register(ModuleName, 1, "missing exchange rate for %s")
 	ErrWebsocketDial       = sdkerrors.Register(ModuleName, 2, "error connecting to %s websocket: %w")

@@ -72,7 +72,7 @@ type (
 		ID     uint16   `json:"id"`     // identify messages going back and forth
 	}
 
-	// BinanceSubscriptionResp the response structure for a binance subscription response
+	// BinanceSubscriptionResp the response structure for a binance subscription response.
 	BinanceSubscriptionResp struct {
 		Result string `json:"result"`
 		ID     uint16 `json:"id"`
@@ -142,7 +142,7 @@ func NewBinanceProvider(
 }
 
 func (p *BinanceProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
-	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
+	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2) //nolint:gomnd //no need to make const
 	for _, cp := range cps {
 		binanceTickerPair := currencyPairToBinanceTickerPair(cp)
 		subscriptionMsgs = append(subscriptionMsgs, newBinanceSubscriptionMsg(binanceTickerPair))
@@ -154,7 +154,7 @@ func (p *BinanceProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []inter
 }
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
-// and adds them to the providers subscribedPairs array
+// and adds them to the providers subscribedPairs array.
 func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()

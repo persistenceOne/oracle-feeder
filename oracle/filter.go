@@ -65,6 +65,8 @@ func FilterTickerDeviations(
 
 // filterCandleDeviations finds the standard deviations of the tvwaps of
 // all assets, and filters out any providers that are not within 2𝜎 of the mean.
+//
+//nolint:funlen //No need to split this function
 func filterCandleDeviations(
 	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,

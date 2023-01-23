@@ -55,6 +55,7 @@ func Execute() {
 	}
 }
 
+//nolint:funlen //No need to split this function
 func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	logLvlStr, err := cmd.Flags().GetString(flagLogLevel)
 	if err != nil {
@@ -205,7 +206,8 @@ func startPriceFeeder(
 	for {
 		select {
 		case <-ctx.Done():
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second) //nolint:gomnd //const
+			// no need to make const
 			defer cancel()
 
 			logger.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder server...")

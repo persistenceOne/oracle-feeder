@@ -23,7 +23,7 @@ const (
 	envPriceFeederPass = "PRICE_FEEDER_KEY_PASS"
 )
 
-// setConfig params at the package state
+// setConfig params at the package state.
 func setConfig() {
 	cfg := sdk.GetConfig()
 

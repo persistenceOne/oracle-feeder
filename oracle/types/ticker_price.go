@@ -12,7 +12,7 @@ type TickerPrice struct {
 	Volume sdk.Dec // 24h volume
 }
 
-// NewTickerPrice parses the lastPrice and volume to a decimal and returns a TickerPrice
+// NewTickerPrice parses the lastPrice and volume to a decimal and returns a TickerPrice.
 func NewTickerPrice(provider, symbol, lastPrice, volume string) (TickerPrice, error) {
 	price, err := sdk.NewDecFromStr(lastPrice)
 	if err != nil {

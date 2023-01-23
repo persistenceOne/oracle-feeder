@@ -139,7 +139,7 @@ func NewKrakenProvider(
 }
 
 func (p *KrakenProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
-	subscriptionMsgs := make([]interface{}, 0, len(cps)*2)
+	subscriptionMsgs := make([]interface{}, 0, len(cps)*2) //nolint: gomnd //const
 	for _, cp := range cps {
 		krakenPair := currencyPairToKrakenPair(cp)
 		subscriptionMsgs = append(subscriptionMsgs, newKrakenTickerSubscriptionMsg(krakenPair))
@@ -149,7 +149,7 @@ func (p *KrakenProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interf
 }
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
-// and adds them to the providers subscribedPairs array
+// and adds them to the providers subscribedPairs array.
 func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
@@ -286,7 +286,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 		return err
 	}
 
-	if len(tickerMessage) != 4 {
+	if len(tickerMessage) != 4 { //nolint:gomnd //no need to make const
 		return fmt.Errorf("received an unexpected structure")
 	}
 
@@ -334,7 +334,7 @@ func (candle *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	if err := json.Unmarshal(buf, &tmp); err != nil {
 		return err
 	}
-	if len(tmp) != 9 {
+	if len(tmp) != 9 { //nolint:gomnd //no need to make const
 		return fmt.Errorf("wrong number of fields in candle")
 	}
 
@@ -343,7 +343,7 @@ func (candle *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	if !ok {
 		return fmt.Errorf("time field must be a string")
 	}
-	timeFloat, err := strconv.ParseFloat(time, 64)
+	timeFloat, err := strconv.ParseFloat(time, 64) //nolint:gomnd //no need to make const
 	if err != nil {
 		return fmt.Errorf("unable to convert time to float")
 	}
@@ -373,7 +373,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 		return err
 	}
 
-	if len(candleMessage) != 4 {
+	if len(candleMessage) != 4 { //nolint:gomnd //no need to make const
 		return fmt.Errorf("received something different than candle")
 	}
 

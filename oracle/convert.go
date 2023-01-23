@@ -37,6 +37,8 @@ func getUSDBasedProviders(
 // ConvertCandlesToUSD converts any candles which are not quoted in USD
 // to USD by other price feeds. It will also filter out any candles not
 // within the deviation threshold set by the config.
+//
+//nolint:funlen //No need to split this function
 func ConvertCandlesToUSD(
 	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
@@ -110,7 +112,7 @@ func ConvertCandlesToUSD(
 	return candles, nil
 }
 
-func getValidCandles(candles provider.AggregatedProviderCandles, validProviders map[provider.Name]struct{}, quote string) (provider.AggregatedProviderCandles, error) {
+func getValidCandles(candles provider.AggregatedProviderCandles, validProviders map[provider.Name]struct{}, quote string) (provider.AggregatedProviderCandles, error) { //nolint:lll //function args is in 1 line
 	// Find candles which we can use for conversion, and calculate the tvwap
 	// to find the conversion rate.
 	validCandleList := provider.AggregatedProviderCandles{}
@@ -138,6 +140,8 @@ func getValidCandles(candles provider.AggregatedProviderCandles, validProviders 
 // ConvertTickersToUSD converts any tickers which are not quoted in USD to USD,
 // using the conversion rates of other tickers. It will also filter out any tickers
 // not within the deviation threshold set by the config.
+//
+//nolint:funlen //No need to split this function
 func ConvertTickersToUSD(
 	logger zerolog.Logger,
 	tickers provider.AggregatedProviderPrices,

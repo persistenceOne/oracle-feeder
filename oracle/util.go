@@ -16,11 +16,11 @@ var (
 )
 
 const (
-	// tvwapCandlePeriod represents the time period we use for tvwap in minutes
+	// tvwapCandlePeriod represents the time period we use for tvwap in minutes.
 	tvwapCandlePeriod = 5 * time.Minute
 )
 
-// compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
+// compute VWAP for each base by dividing the Σ {P * V} by Σ {V}.
 func vwap(weightedPrices, volumeSum map[string]sdk.Dec) map[string]sdk.Dec {
 	vwaps := make(map[string]sdk.Dec)
 
@@ -125,7 +125,6 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 					weightedPrices[base] = weightedPrices[base].Add(candle.Price.Mul(volume))
 				}
 			}
-
 		}
 	}
 
@@ -134,7 +133,7 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 
 // ComputeStandardDeviationsAndMeans returns maps of the standard deviations and means of assets.
 // Will skip calculating for an asset if there are less than 3 prices.
-func ComputeStandardDeviationsAndMeans(prices map[provider.Name]map[string]sdk.Dec) (map[string]sdk.Dec, map[string]sdk.Dec, error) {
+func ComputeStandardDeviationsAndMeans(prices map[provider.Name]map[string]sdk.Dec) (map[string]sdk.Dec, map[string]sdk.Dec, error) { //nolint:lll //function args is in 1 line
 	stdDevs := make(map[string]sdk.Dec)
 	means := make(map[string]sdk.Dec)
 	priceSlice := make(map[string][]sdk.Dec)
@@ -155,7 +154,7 @@ func ComputeStandardDeviationsAndMeans(prices map[provider.Name]map[string]sdk.D
 	}
 
 	for asset, sum := range priceSums {
-		if len(priceSlice[asset]) < 3 {
+		if len(priceSlice[asset]) < 3 { //nolint:gomnd //no need to make const
 			continue
 		}
 
@@ -188,7 +187,7 @@ func ComputeStandardDeviationsAndMeans(prices map[provider.Name]map[string]sdk.D
 }
 
 // computeTvwapsByProvider computes the tvwap prices from candles for each provider separately and returns them
-// in a map separated by provider name
+// in a map separated by provider name.
 func computeTvwapsByProvider(prices provider.AggregatedProviderCandles) (map[provider.Name]map[string]sdk.Dec, error) {
 	tvwaps := make(map[provider.Name]map[string]sdk.Dec)
 	var err error
@@ -204,7 +203,7 @@ func computeTvwapsByProvider(prices provider.AggregatedProviderCandles) (map[pro
 }
 
 // computeVwapsByProvider computes the vwap prices from tickers for each provider separately and returns them
-// in a map separated by provider name
+// in a map separated by provider name.
 func computeVwapsByProvider(prices provider.AggregatedProviderPrices) map[provider.Name]map[string]sdk.Dec {
 	vwaps := make(map[provider.Name]map[string]sdk.Dec)
 

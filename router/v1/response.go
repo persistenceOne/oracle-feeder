@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Response constants
+// Response constants.
 const (
 	StatusAvailable = "available"
 )

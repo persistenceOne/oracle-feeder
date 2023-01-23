@@ -13,7 +13,7 @@ type CandlePrice struct {
 	TimeStamp int64   // timestamp
 }
 
-// NewCandlePrice parses the lastPrice and volume to a decimal and returns a CandlePrice
+// NewCandlePrice parses the lastPrice and volume to a decimal and returns a CandlePrice.
 func NewCandlePrice(provider, symbol, lastPrice, volume string, timeStamp int64) (CandlePrice, error) {
 	price, err := sdk.NewDecFromStr(lastPrice)
 	if err != nil {

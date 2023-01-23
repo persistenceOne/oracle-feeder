@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// Common HTTP methods and header values
+// Common HTTP methods and header values.
 const (
 	MethodGET = "GET"
 )

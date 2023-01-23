@@ -183,12 +183,12 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 	return prices
 }
 
-// GetTVWAPPrices returns a copy of the tvwapsByProvider map
+// GetTVWAPPrices returns a copy of the tvwapsByProvider map.
 func (o *Oracle) GetTVWAPPrices() PricesByProvider {
 	return o.tvwapsByProvider.GetPricesClone()
 }
 
-// GetVWAPPrices returns the vwapsByProvider map using a read lock
+// GetVWAPPrices returns the vwapsByProvider map using a read lock.
 func (o *Oracle) GetVWAPPrices() PricesByProvider {
 	return o.vwapsByProvider.GetPricesClone()
 }
@@ -209,14 +209,20 @@ prices and candles from the provider.
  - It then flattens and collect prices based on the base currency per provider
  - Finally, it computes the price using GetComputedPrices, then updates the oracle's
 prices property by acquiring the lock and it finally returns an error if any.
-The function is likely designed to fetch price information from different providers and use that information to compute the prices of different currency pairs. The getOrSetProvider function is likely used to create a provider object for a given provider name, if it does not already exist.
-The GetComputedPrices likely to do some logic to calculate price based on the provided information by multiple providers, and the providerPairs, and deviations are likely used to configure which currency pairs and deviation thresholds to use when calculating prices.
+The function is likely designed to fetch price information from different providers and use that information to
+compute the prices of different currency pairs. The getOrSetProvider function is likely used to create a provider
+object for a given provider name, if it does not already exist.
+The GetComputedPrices likely to do some logic to calculate price based on the provided information by multiple
+providers, and the providerPairs, and deviations are likely used to configure which currency pairs and deviation
+thresholds to use when calculating prices.
 
 */
 
 // setPrices retrieve all the prices from our set of providers as determined
 // in the config, average them out, and update the oracle's current exchange
 // rates.
+//
+//nolint:funlen //No need to split this function
 func (o *Oracle) setPrices(ctx context.Context) error {
 	g := errgroup.Group{}
 	mtx := sync.Mutex{}
@@ -235,7 +241,7 @@ func (o *Oracle) setPrices(ctx context.Context) error {
 			requiredRates[pair.Base] = struct{}{}
 		}
 
-		var cp = currencyPairs
+		cp := currencyPairs
 		g.Go(func() error {
 			prices, err := priceProvider.GetTickerPrices(cp...)
 			if err != nil {
@@ -319,6 +325,8 @@ calculate price, it also consider the deviation rate to filter out inaccurate da
 // It returns candles' TVWAP if possible, if not possible (not available
 // or due to some staleness) it will use the most recent ticker prices
 // and the VWAP formula instead.
+//
+//nolint:funlen //No need to split this function
 func (o *Oracle) GetComputedPrices(
 	providerCandles provider.AggregatedProviderCandles,
 	providerPrices provider.AggregatedProviderPrices,
@@ -446,6 +454,7 @@ func (o *Oracle) checkAcceptList(params oracletypes.Params) {
 	}
 }
 
+//nolint:funlen //No need to split this function
 func (o *Oracle) executeTick(ctx context.Context) error {
 	o.logger.Debug().Msg("executing oracle tick")
 
@@ -480,7 +489,7 @@ func (o *Oracle) executeTick(ctx context.Context) error {
 		return nil
 	}
 
-	salt, err := generateSalt(32)
+	salt, err := generateSalt(32) //nolint:gomnd //no need to make const
 	if err != nil {
 		return err
 	}
@@ -505,14 +514,12 @@ func (o *Oracle) executeTick(ctx context.Context) error {
 	if o.previousPrevote == nil {
 		// This timeout could be as small as oracleVotePeriod-indexInVotePeriod,
 		// but we give it some extra time just in case.
-		//
-		// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L222
 		o.logger.Info().
 			Str("hash", hash.String()).
 			Str("validator", preVoteMsg.Validator).
 			Str("feeder", preVoteMsg.Feeder).
 			Msg("broadcasting pre-vote")
-		if err := o.client.BroadcastTx(nextBlockHeight, oracleVotePeriod*2, preVoteMsg); err != nil {
+		if err := o.client.BroadcastTx(nextBlockHeight, oracleVotePeriod*2, preVoteMsg); err != nil { //nolint:gomnd // const
 			return err
 		}
 
@@ -619,7 +626,7 @@ func (o *Oracle) getParams(ctx context.Context) (oracletypes.Params, error) {
 	defer grpcConn.Close()
 	queryClient := oracletypes.NewQueryClient(grpcConn)
 
-	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second) //nolint:gomnd //no need to make const
 	defer cancel()
 
 	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParamsRequest{})
@@ -668,8 +675,8 @@ func generateSalt(length int) (string, error) {
 	}
 
 	salt := make([]byte, length)
-	_, err := rand.Read(salt)
-	if err != nil {
+
+	if _, err := rand.Read(salt); err != nil { //nolint: gosec //this is okay
 		return "", err
 	}
 
