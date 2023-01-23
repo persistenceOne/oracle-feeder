@@ -23,6 +23,11 @@ jobs:
         with:
           go-version: 1.19.x
 
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+
       - name: Run CI
         run: make ci
 

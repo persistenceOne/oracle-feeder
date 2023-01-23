@@ -77,3 +77,7 @@ integration-test:
 .PHONY: lint
 lint: ## golangci-lint
 	golangci-lint run
+
+define print-target
+    @printf "Executing target: \033[36m$@\033[0m\n"
+endef
