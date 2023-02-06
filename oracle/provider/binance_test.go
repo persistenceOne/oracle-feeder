@@ -12,7 +12,12 @@ import (
 	"github.com/persistenceOne/oracle-feeder/oracle/types"
 )
 
-//nolint:funlen // test
+const (
+	lastPriceAtom = "34.69000000"
+	lastPriceOsmo = "41.35000000"
+	volume        = "2396974.02000000"
+)
+
 func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewBinanceProvider(
 		context.TODO(),
@@ -24,13 +29,10 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
-		lastPrice := "34.69000000"
-		volume := "2396974.02000000"
-
 		tickerMap := map[string]BinanceTicker{}
 		tickerMap["ATOMUSD"] = BinanceTicker{
 			Symbol:    "ATOMUSD",
-			LastPrice: lastPrice,
+			LastPrice: lastPriceAtom,
 			Volume:    volume,
 		}
 
@@ -39,15 +41,11 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USD"})
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
-		require.Equal(t, sdk.MustNewDecFromStr(lastPrice), prices["ATOMUSD"].Price)
+		require.Equal(t, sdk.MustNewDecFromStr(lastPriceAtom), prices["ATOMUSD"].Price)
 		require.Equal(t, sdk.MustNewDecFromStr(volume), prices["ATOMUSD"].Volume)
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
-		lastPriceAtom := "34.69000000"
-		lastPriceOsmo := "41.35000000"
-		volume := "2396974.02000000"
-
 		tickerMap := map[string]BinanceTicker{}
 		tickerMap["ATOMUSD"] = BinanceTicker{
 			Symbol:    "ATOMUSD",

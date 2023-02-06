@@ -42,7 +42,7 @@ vote and prevote messages following the oracle voting procedure.`,
 
 func init() {
 	setConfig()
-	rootCmd.PersistentFlags().String(flagLogLevel, zerolog.TraceLevel.String(), "logging level")
+	rootCmd.PersistentFlags().String(flagLogLevel, zerolog.InfoLevel.String(), "logging level")
 	rootCmd.PersistentFlags().String(flagLogFormat, logLevelText, "logging format; must be either json or text")
 }
 

@@ -440,6 +440,15 @@ func NewProvider(
 
 	case provider.Osmosis:
 		return provider.NewOsmosisProvider(endpoint), nil
+
+	case provider.Huobi:
+		return provider.NewHuobiProvider(ctx, logger, endpoint, providerPairs...)
+
+	case provider.Coinbase:
+		return provider.NewCoinbaseProvider(ctx, logger, endpoint, providerPairs...)
+
+	case provider.Crypto:
+		return provider.NewCryptoProvider(ctx, logger, endpoint, providerPairs...)
 	}
 
 	return nil, fmt.Errorf("provider %s not found", providerName)

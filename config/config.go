@@ -38,6 +38,9 @@ var (
 		provider.Binance:   {},
 		provider.BinanceUS: {},
 		provider.Osmosis:   {},
+		provider.Crypto:    {},
+		provider.Coinbase:  {},
+		provider.Huobi:     {},
 	}
 
 	// maxDeviationThreshold is the maxmimum allowed amount of standard

@@ -1,6 +1,5 @@
 gas_adjustment = 1.5
 fees = "100uxprt"
-provider_min_override=true
 
 [server]
 listen_addr = "0.0.0.0:7171"
@@ -20,21 +19,19 @@ threshold = "1.5"
 base = "ATOM"
 providers = [
   "kraken",
+  "binance",
+  "coinbase",
+  "huobi",
+  "crypto",
 ]
 quote = "USD"
 
 [[currency_pairs]]
-base = "ATOM"
+base = "USDC"
 providers = [
   "osmosis",
   "kraken",
-]
-quote = "USD"
-
-[[currency_pairs]]
-base = "OSMO"
-providers = [
-  "osmosis",
+  "binance"
 ]
 quote = "USD"
 

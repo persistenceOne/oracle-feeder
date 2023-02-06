@@ -19,6 +19,9 @@ const (
 	Binance   Name = "binance"
 	BinanceUS Name = "binanceus"
 	Osmosis   Name = "osmosis"
+	Crypto    Name = "crypto"
+	Coinbase  Name = "coinbase"
+	Huobi     Name = "huobi"
 )
 
 const (

@@ -17,6 +17,7 @@ import (
 const (
 	defaultReadNewWSMessage   = 50 * time.Millisecond
 	defaultMaxConnectionTime  = time.Hour * 23 // should be < 24h
+	defaultPingDuration       = 15 * time.Second
 	disabledPingDuration      = time.Duration(0)
 	startingReconnectDuration = 5 * time.Second
 )
