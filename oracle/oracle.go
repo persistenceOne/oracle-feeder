@@ -22,7 +22,7 @@ import (
 	"github.com/persistenceOne/oracle-feeder/oracle/types"
 	pfsync "github.com/persistenceOne/oracle-feeder/pkg/sync"
 
-	oracletypes "github.com/persistenceOne/persistence-sdk/x/oracle/types"
+	oracletypes "github.com/persistenceOne/persistence-sdk/v2/x/oracle/types"
 
 	"github.com/persistenceOne/oracle-feeder/oracle/client"
 )

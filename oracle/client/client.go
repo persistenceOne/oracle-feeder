@@ -20,8 +20,8 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
-	"github.com/persistenceOne/persistence-sdk/simapp"
-	simparams "github.com/persistenceOne/persistence-sdk/simapp/params"
+	"github.com/persistenceOne/persistence-sdk/v2/simapp"
+	simparams "github.com/persistenceOne/persistence-sdk/v2/simapp/params"
 )
 
 const (
