@@ -242,7 +242,7 @@ func CheckProviderMinimum(ctx context.Context, logger zerolog.Logger, cfg Config
 	for base, providers := range pairs {
 		minProviders := minimumProvider
 		if currencyProviderTracker != nil {
-			minProviders = currencyProviderTracker.CurrencyProviderMin[base]
+			minProviders = currencyProviderTracker.GetMinCurrencyProvider()[base]
 		}
 		if len(providers) < minProviders {
 			return fmt.Errorf("must have at least %d providers for %s", minProviders, base)

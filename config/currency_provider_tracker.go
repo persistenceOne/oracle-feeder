@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/rs/zerolog"
+	"github.com/tendermint/tendermint/libs/sync"
 )
 
 const (
@@ -16,8 +18,8 @@ const (
 	coinGeckoListEndpoint    = "list"
 	coinGeckoTickersEndpoint = "tickers"
 	trackingPeriod           = time.Hour * 24
-
-	minimumProvider = 2
+	requestTimeout           = time.Second * 2
+	minimumProvider          = 2
 )
 
 type (
@@ -30,9 +32,10 @@ type (
 	CurrencyProviderTracker struct {
 		logger              zerolog.Logger
 		pairs               []CurrencyPair
+		mutex               *sync.RWMutex
 		coinIDSymbolMap     map[string]string   // ex: map["ATOM"] = "cosmos"
-		CurrencyProviders   map[string][]string // map of price feeder currencies and what exchanges support them
-		CurrencyProviderMin map[string]int      // map of price feeder currencies and min required providers for them
+		currencyProviders   map[string][]string // map of price feeder currencies and what exchanges support them
+		currencyProviderMin map[string]int      // map of price feeder currencies and min required providers for them
 	}
 
 	// List of assets on CoinGecko and their corresponding id and symbol.
@@ -46,11 +49,13 @@ type (
 	coinTickerResponse struct {
 		Tickers []coinTicker `json:"tickers"`
 	}
+
 	coinTicker struct {
 		Base   string     `json:"base"`   // CurrencyPair.Base
 		Target string     `json:"target"` // CurrencyPair.Quote
 		Market coinMarket `json:"market"`
 	}
+
 	coinMarket struct {
 		Name string `json:"name"` // ex: Binance
 	}
@@ -64,9 +69,10 @@ func newCurrencyProviderTracker(
 	currencyProviderTracker := &CurrencyProviderTracker{
 		logger:              logger,
 		pairs:               pairs,
+		mutex:               &sync.RWMutex{},
 		coinIDSymbolMap:     map[string]string{},
-		CurrencyProviders:   map[string][]string{},
-		CurrencyProviderMin: map[string]int{},
+		currencyProviders:   map[string][]string{},
+		currencyProviderMin: map[string]int{},
 	}
 
 	if err := currencyProviderTracker.setCoinIDSymbolMap(); err != nil {
@@ -85,7 +91,7 @@ func newCurrencyProviderTracker(
 }
 
 func (t *CurrencyProviderTracker) logCurrencyProviders() {
-	for currency, providers := range t.CurrencyProviders {
+	for currency, providers := range t.currencyProviders {
 		t.logger.Info().Msg(fmt.Sprintf("providers supporting %s: %v", currency, providers))
 	}
 }
@@ -100,7 +106,7 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 
 	var listResponse []coinList
 	if err := json.NewDecoder(resp.Body).Decode(&listResponse); err != nil {
-		return err
+		return sdkerrors.Wrap(err, "failed to decode response body as JSON")
 	}
 
 	for _, coin := range listResponse {
@@ -114,23 +120,34 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 // endpoint to get all the exchanges that support each price feeder currency pair and store
 // it in the CurrencyProviders map.
 func (t *CurrencyProviderTracker) setCurrencyProviders() error {
+	client := &http.Client{
+		Timeout: requestTimeout,
+	}
+
 	for _, pair := range t.pairs {
 		// check if CoinGecko API supports pair
 		pairBaseID := t.coinIDSymbolMap[strings.ToLower(pair.Base)]
-		coinGeckoResp, err := http.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestURL, pairBaseID, coinGeckoTickersEndpoint))
+
+		coinGeckoResp, err := client.Get(fmt.Sprintf("%s/%s/%s/%s",
+			coinGeckoRestURL,
+			pairBaseID,
+			coinGeckoTickersEndpoint,
+			pair.Quote))
 		if err != nil {
-			return err
+			return sdkerrors.Wrapf(err, "failed to query coin gecko api tickers endpoint for %s", pair.Base)
 		}
-		defer coinGeckoResp.Body.Close()
 
 		var tickerResponse coinTickerResponse
 		if err = json.NewDecoder(coinGeckoResp.Body).Decode(&tickerResponse); err != nil {
-			return err
+			return sdkerrors.Wrap(err, "failed to decode response body as JSON")
 		}
+
+		// close the response body.
+		coinGeckoResp.Body.Close()
 
 		for _, ticker := range tickerResponse.Tickers {
 			if ticker.Target == pair.Quote {
-				t.CurrencyProviders[pair.Base] = append(t.CurrencyProviders[pair.Base], ticker.Market.Name)
+				t.currencyProviders[pair.Base] = append(t.currencyProviders[pair.Base], ticker.Market.Name)
 			}
 		}
 	}
@@ -142,11 +159,11 @@ func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 // to the amount of exchanges that support them if it's less than 3. Otherwise it is
 // set to 2 providers.
 func (t *CurrencyProviderTracker) setCurrencyProviderMin() {
-	for base, exchanges := range t.CurrencyProviders {
+	for base, exchanges := range t.currencyProviders {
 		if len(exchanges) < minimumProvider {
-			t.CurrencyProviderMin[base] = len(exchanges)
+			t.currencyProviderMin[base] = len(exchanges)
 		} else {
-			t.CurrencyProviderMin[base] = minimumProvider
+			t.currencyProviderMin[base] = minimumProvider
 		}
 	}
 }
@@ -155,17 +172,24 @@ func (t *CurrencyProviderTracker) setCurrencyProviderMin() {
 // exchanges for each currency every 24 hours.
 func (t *CurrencyProviderTracker) trackCurrencyProviders(ctx context.Context) {
 	t.logCurrencyProviders()
+	trackingTicker := time.NewTicker(trackingPeriod)
+	defer trackingTicker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(trackingPeriod):
+		case <-trackingTicker.C:
 			if err := t.setCurrencyProviders(); err != nil {
-				t.logger.Error().Err(err).Msg("failed to set available providers for currencies")
+				t.logger.Error().Err(err).Msg("Failed to set available providers for currencies")
 			}
 
 			t.logCurrencyProviders()
 		}
 	}
+}
+
+// return the minimum amount of providers for each currency.
+func (t *CurrencyProviderTracker) GetMinCurrencyProvider() map[string]int {
+	return t.currencyProviderMin
 }

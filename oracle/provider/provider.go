@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	defaultTimeout       = 20 * time.Second
+	defaultTimeout       = 10 * time.Second
 	providerCandlePeriod = 10 * time.Minute
 
 	Kraken    Name = "kraken"

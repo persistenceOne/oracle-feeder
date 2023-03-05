@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"time"
@@ -144,7 +143,7 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 // will be made until the transaction succeeds or ultimately times out or fails.
 //
 //nolint:funlen //No need to split this function
-func (oc OracleClient) BroadcastTx(nextBlockHeight, timeoutHeight int64, msgs ...sdk.Msg) error {
+func (oc OracleClient) BroadcastTx(ctx context.Context, nextBlockHeight, timeoutHeight int64, msgs ...sdk.Msg) error {
 	maxBlockHeight := nextBlockHeight + timeoutHeight
 	lastCheckHeight := nextBlockHeight - 1
 
@@ -159,28 +158,20 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight, timeoutHeight int64, msgs ..
 	}
 
 	// re-try voting until timeout
-	for {
+	for lastCheckHeight < maxBlockHeight {
 		latestBlockHeight, err := oc.ChainHeight.GetChainHeight()
 		if err != nil {
 			return err
 		}
 
 		if latestBlockHeight <= lastCheckHeight {
-			time.Sleep(time.Second * 1) // sleep before retrying
 			continue
 		}
 
 		// set last check height to latest block height
 		lastCheckHeight = latestBlockHeight
 
-		if lastCheckHeight >= maxBlockHeight {
-			return errors.New("broadcasting tx timed out")
-		}
-
-		resp, err := broadcastTx(clientCtx, factory, msgs...)
-		if resp != nil && resp.Code != 0 {
-			err = fmt.Errorf("invalid response code from tx: %d", resp.Code)
-		}
+		resp, err := broadcastTx(ctx, clientCtx, factory, msgs...)
 		if err != nil {
 			var (
 				code uint32
@@ -211,6 +202,8 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight, timeoutHeight int64, msgs ..
 
 		return nil
 	}
+
+	return errors.New("broadcasting tx timed out")
 }
 
 // createClientContext creates an SDK client Context instance used for transaction

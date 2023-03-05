@@ -519,7 +519,10 @@ func (o *Oracle) executeTick(ctx context.Context) error {
 			Str("validator", preVoteMsg.Validator).
 			Str("feeder", preVoteMsg.Feeder).
 			Msg("broadcasting pre-vote")
-		if err := o.client.BroadcastTx(nextBlockHeight, oracleVotePeriod*2, preVoteMsg); err != nil { //nolint:gomnd // const
+		if err := o.client.BroadcastTx(ctx,
+			nextBlockHeight,
+			oracleVotePeriod*2,
+			preVoteMsg); err != nil { //nolint:gomnd // const
 			return err
 		}
 
@@ -549,6 +552,7 @@ func (o *Oracle) executeTick(ctx context.Context) error {
 			Str("feeder", voteMsg.Feeder).
 			Msg("broadcasting vote")
 		if err := o.client.BroadcastTx(
+			ctx,
 			nextBlockHeight,
 			oracleVotePeriod-indexInVotePeriod,
 			voteMsg,
