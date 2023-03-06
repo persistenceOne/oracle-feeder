@@ -141,8 +141,6 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 
 // BroadcastTx attempts to broadcast a signed transaction. If it fails, a few re-attempts
 // will be made until the transaction succeeds or ultimately times out or fails.
-//
-//nolint:funlen //No need to split this function
 func (oc OracleClient) BroadcastTx(ctx context.Context, nextBlockHeight, timeoutHeight int64, msgs ...sdk.Msg) error {
 	maxBlockHeight := nextBlockHeight + timeoutHeight
 	lastCheckHeight := nextBlockHeight - 1
