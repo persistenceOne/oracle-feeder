@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/persistenceOne/persistenceCore/v6/app"
+	"github.com/persistenceOne/persistenceCore/v7/app"
 
 	"github.com/cosmos/cosmos-sdk/client/input"
 	sdk "github.com/cosmos/cosmos-sdk/types"

@@ -1,6 +1,6 @@
 package oracle
 
-import oracletypes "github.com/persistenceOne/persistence-sdk/x/oracle/types"
+import oracletypes "github.com/persistenceOne/persistence-sdk/v2/x/oracle/types"
 
 const (
 	// paramsCacheInterval represents the amount of blocks
