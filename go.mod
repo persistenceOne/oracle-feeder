@@ -16,12 +16,13 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/tendermint/tendermint v0.34.26
 	golang.org/x/sync v0.1.0
-	google.golang.org/grpc v1.52.3
+	google.golang.org/grpc v1.53.0
 )
 
 require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/persistenceOne/persistenceCore/v7 v7.0.0
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.15.0
 )
 
@@ -43,7 +44,7 @@ require (
 	github.com/btcsuite/btcd v0.22.2 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/errors v1.9.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/pebble v0.0.0-20220817183557-09c6e030a677 // indirect
@@ -121,7 +122,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/persistenceOne/pstake-native/v2 v2.0.0 // indirect
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
