@@ -41,6 +41,7 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 		require.Equal(t, volume, prices["ATOMUSD"].Volume)
 	})
 
+	//nolint:dupl // test
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
 		lastPriceAtom := sdk.MustNewDecFromStr("34.69000000")
 		lastPriceOsmosis := sdk.MustNewDecFromStr("41.35000000")

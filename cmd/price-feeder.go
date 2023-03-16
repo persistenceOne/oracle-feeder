@@ -31,7 +31,7 @@ var rootCmd = &cobra.Command{
 	Use:   "price-feeder [config-file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "price-feeder is a side-car process for providing on-chain oracle with price data",
-	Long: `A side-car process that validators must run in order to provide 
+	Long: `A side-car process that validators must run in order to provide
 on-chain price oracle with price information. The price-feeder performs
 two primary functions. First, it is responsible for obtaining price information
 from various reliable data sources, e.g. exchanges, and exposing this data via
@@ -42,7 +42,7 @@ vote and prevote messages following the oracle voting procedure.`,
 
 func init() {
 	setConfig()
-	rootCmd.PersistentFlags().String(flagLogLevel, zerolog.TraceLevel.String(), "logging level")
+	rootCmd.PersistentFlags().String(flagLogLevel, zerolog.InfoLevel.String(), "logging level")
 	rootCmd.PersistentFlags().String(flagLogFormat, logLevelText, "logging format; must be either json or text")
 }
 
