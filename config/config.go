@@ -41,6 +41,7 @@ var (
 		provider.Crypto:    {},
 		provider.Coinbase:  {},
 		provider.Huobi:     {},
+		provider.Mock:      {},
 	}
 
 	// maxDeviationThreshold is the maxmimum allowed amount of standard
