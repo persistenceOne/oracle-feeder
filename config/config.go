@@ -242,17 +242,27 @@ func CheckProviderMinimum(ctx context.Context, logger zerolog.Logger, cfg Config
 		}
 	}
 
-	pairs := make(map[string][]provider.Name)
+	pairs := make(map[string]map[provider.Name]struct{})
 	for _, cp := range cfg.CurrencyPairs {
-		pairs[cp.Base] = append(pairs[cp.Base], cp.Providers...)
+		if _, ok := pairs[cp.Base]; !ok {
+			pairs[cp.Base] = make(map[provider.Name]struct{})
+		}
+		for _, provider := range cp.Providers {
+			pairs[cp.Base][provider] = struct{}{}
+		}
 	}
 
 	for base, providers := range pairs {
-		minProviders := minimumProvider
+		// If currency provider tracker errored, default to two providers as
+		// the minimum.
+		var minProviders int
 		if currencyProviderTracker != nil {
 			minProviders = currencyProviderTracker.GetMinCurrencyProvider()[base]
+		} else {
+			minProviders = minimumProvider
 		}
-		if len(providers) < minProviders {
+
+		if _, ok := pairs[base][provider.Mock]; !ok && len(providers) < minProviders {
 			return fmt.Errorf("must have at least %d providers for %s", minProviders, base)
 		}
 	}

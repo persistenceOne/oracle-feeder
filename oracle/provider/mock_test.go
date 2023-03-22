@@ -13,8 +13,6 @@ import (
 
 //nolint:funlen //No need to split this function
 func TestMockProvider_GetTickerPrices(t *testing.T) {
-	mp := NewMockProvider()
-
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			require.Equal(t, "/", req.URL.String())
@@ -27,8 +25,8 @@ ATOM,USD,21.84,1827884.77
 		}))
 		defer server.Close()
 
-		mp.client = server.Client()
-		mp.baseURL = server.URL
+		mp, err := NewMockProvider(server.URL, server.Client())
+		require.NoError(t, err)
 
 		prices, err := mp.GetTickerPrices(types.CurrencyPair{Base: "OSMO", Quote: "USD"})
 		require.NoError(t, err)
@@ -49,8 +47,8 @@ ATOM,USD,21.84,1827884.77
 		}))
 		defer server.Close()
 
-		mp.client = server.Client()
-		mp.baseURL = server.URL
+		mp, err := NewMockProvider(server.URL, server.Client())
+		require.NoError(t, err)
 
 		prices, err := mp.GetTickerPrices(
 			types.CurrencyPair{Base: "OSMO", Quote: "USD"},
@@ -72,8 +70,8 @@ ATOM,USD,21.84,1827884.77
 		}))
 		defer server.Close()
 
-		mp.client = server.Client()
-		mp.baseURL = server.URL
+		mp, err := NewMockProvider(server.URL, server.Client())
+		require.NoError(t, err)
 
 		prices, err := mp.GetTickerPrices(types.CurrencyPair{Base: "OSMO", Quote: "USD"})
 		require.Error(t, err)

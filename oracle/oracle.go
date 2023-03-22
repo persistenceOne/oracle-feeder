@@ -451,7 +451,7 @@ func NewProvider(
 		return provider.NewCryptoProvider(ctx, logger, endpoint, providerPairs...)
 
 	case provider.Mock:
-		return provider.NewMockProvider(), nil
+		return provider.NewMockProvider("", nil)
 	}
 
 	return nil, fmt.Errorf("provider %s not found", providerName)

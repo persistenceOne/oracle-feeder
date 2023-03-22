@@ -22,7 +22,9 @@ require (
 require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/persistenceOne/persistenceCore/v7 v7.0.0
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.15.0
+	go.uber.org/zap v1.23.0
 )
 
 require (
@@ -121,7 +123,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/persistenceOne/pstake-native/v2 v2.0.0 // indirect
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
@@ -143,6 +144,8 @@ require (
 	github.com/zondax/hid v0.9.1 // indirect
 	github.com/zondax/ledger-go v0.14.1 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20221019170559-20944726eadf // indirect
 	golang.org/x/net v0.5.0 // indirect
