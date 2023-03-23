@@ -81,3 +81,14 @@ lint: ## golangci-lint
 define print-target
     @printf "Executing target: \033[36m$@\033[0m\n"
 endef
+
+.PHONY: image
+image-e2e: export DOCKER_BUILDKIT=1
+image-e2e: export BUILDKIT_INLINE_CACHE=1
+image-e2e:
+	docker build --ssh=default \
+		--build-arg GO_VERSION="1.20" \
+		--build-arg BIN_NAME="oracle-feeder" \
+		--build-arg BIN_PACKAGE="github.com/persistenceOne/oracle-feeder" \
+		--tag "persistenceone/oracle-feeder-e2e" \
+		-f Dockerfile.e2e .
