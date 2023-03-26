@@ -42,7 +42,6 @@ type (
 		RPCTimeout          time.Duration
 		OracleAddr          sdk.AccAddress
 		OracleAddrString    string
-		ValidatorAddr       sdk.ValAddress
 		ValidatorAddrString string
 		Encoding            simparams.EncodingConfig
 		GasPrices           string
@@ -89,7 +88,6 @@ func NewOracleClient(
 		RPCTimeout:          rpcTimeout,
 		OracleAddr:          oracleAddr,
 		OracleAddrString:    oracleAddrString,
-		ValidatorAddr:       sdk.ValAddress(validatorAddrString),
 		ValidatorAddrString: validatorAddrString,
 		Encoding:            simapp.MakeTestEncodingConfig(),
 		GasAdjustment:       gasAdjustment,
