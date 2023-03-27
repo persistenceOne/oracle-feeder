@@ -4,7 +4,7 @@ import "github.com/pkg/errors"
 
 var (
 	ErrCosmosKeyringCreationFailed = errors.New("cosmos keyring creation failed")
-	ErrCosmosKeyringImportFailed   = errors.New("cosmos keyrig unable to import key")
+	ErrCosmosKeyringImportFailed   = errors.New("cosmos keyring unable to import key")
 	ErrDeriveFailed                = errors.New("key derivation failed")
 	ErrFailedToApplyConfigOption   = errors.New("failed to apply config option")
 	ErrFilepathIncorrect           = errors.New("incorrect filepath")

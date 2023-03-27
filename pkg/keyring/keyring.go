@@ -226,23 +226,20 @@ func fromCosmosKeyring(
 
 	var keyInfo cosmkeyring.Info
 	if fromIsAddress {
-		if keyInfo, err = kb.KeyByAddress(fromAddress); err != nil {
-			err = errors.Wrapf(
-				ErrKeyInfoNotFound,
-				"couldn't find an entry for the key %s in keybase: %s",
-				fromAddress.String(), err.Error(),
-			)
-			return emptyCosmosAddress, nil, err
-		}
+		keyInfo, err = kb.KeyByAddress(fromAddress)
 	} else {
-		if keyInfo, err = kb.Key(config.KeyFrom); err != nil {
-			err = errors.Wrapf(
-				ErrKeyInfoNotFound,
-				"could not find an entry for the key '%s' in keybase: %s",
-				config.KeyFrom, err.Error(),
-			)
-			return emptyCosmosAddress, nil, err
-		}
+		keyInfo, err = kb.Key(config.KeyFrom)
+	}
+
+	if err != nil {
+		err = errors.Wrapf(
+			ErrKeyInfoNotFound,
+			"couldn't find an entry for the key '%s' in keybase: %s",
+			config.KeyFrom,
+			err.Error(),
+		)
+
+		return emptyCosmosAddress, nil, err
 	}
 
 	if err := checkKeyInfo(config, keyInfo); err != nil {

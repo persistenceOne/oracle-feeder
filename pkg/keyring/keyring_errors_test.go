@@ -13,24 +13,11 @@ func (s *KeyringTestSuite) TestErrCosmosKeyringCreationFailed() {
 	requireT := s.Require()
 
 	_, _, err := NewCosmosKeyring(
-		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"),
+		WithKeyFrom(testAccAddressBech),
 		WithKeyringBackend("kowabunga"),
 	)
 
 	requireT.ErrorIs(err, ErrCosmosKeyringCreationFailed)
-}
-
-func (s *KeyringTestSuite) TestErrCosmosKeyringImportFailed() {
-	// No test here:
-	//
-	// failed to find scenario where this error could be returned
-}
-
-func (s *KeyringTestSuite) TestErrDeriveFailed() {
-	// No test here:
-	//
-	// failed to find a scenario when it breaks, the original go-bip39
-	// package that may return errors doesn't have test either.
 }
 
 func (s *KeyringTestSuite) TestErrFailedToApplyConfigOption() {
@@ -41,12 +28,6 @@ func (s *KeyringTestSuite) TestErrFailedToApplyConfigOption() {
 	)
 
 	requireT.ErrorIs(err, ErrFailedToApplyConfigOption)
-}
-
-func (s *KeyringTestSuite) TestErrFilepathIncorrect() {
-	// No test here:
-	//
-	// fails only when Go syscall fails to get cwd (impossible to simulate on macOS)
 }
 
 func (s *KeyringTestSuite) TestErrHexFormatError() {
@@ -117,15 +98,6 @@ func (s *KeyringTestSuite) TestErrKeyIncompatible() {
 	)
 	requireT.NoError(err)
 
-	// This test requires a ledger-enabled build & device
-	//
-	// _, err = testKeyring.SaveLedgerKey(
-	// 	"test_ledeger",
-	// 	hd.Secp256k1,
-	// 	"", 0, 0, 0,
-	// )
-	// requireT.NoError(err)
-
 	_, err = testKeyring.SavePubKey("test_pubkey", testInfo.GetPubKey(), hd.Secp256k1Type)
 	requireT.NoError(err)
 
@@ -182,7 +154,7 @@ func (s *KeyringTestSuite) TestErrUnexpectedAddress() {
 
 	_, _, err := NewCosmosKeyring(
 		WithPrivKeyHex("0000000000000000000000000000000000000000000000000000000000000000"),
-		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"), // will not match privkey above
+		WithKeyFrom(testAccAddressBech), // will not match privkey above
 	)
 
 	requireT.ErrorIs(err, ErrUnexpectedAddress)

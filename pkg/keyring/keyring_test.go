@@ -34,10 +34,10 @@ func (s *KeyringTestSuite) TestKeyFromPrivkey() {
 
 	accAddr, kb, err := NewCosmosKeyring(
 		WithPrivKeyHex(testPrivKeyHex),
-		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"), // must match the privkey above
+		WithKeyFrom(testAccAddressBech), // must match the privkey above
 	)
 	requireT.NoError(err)
-	requireT.Equal("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2", accAddr.String())
+	requireT.Equal(testAccAddressBech, accAddr.String())
 
 	info, err := kb.KeyByAddress(accAddr)
 	requireT.NoError(err)
@@ -57,11 +57,11 @@ func (s *KeyringTestSuite) TestKeyFromMnemonic() {
 
 	accAddr, kb, err := NewCosmosKeyring(
 		WithMnemonic(testMnemonic),
-		WithPrivKeyHex(testPrivKeyHex),                                    // must match mnemonic above
-		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"), // must match mnemonic above
+		WithPrivKeyHex(testPrivKeyHex),  // must match mnemonic above
+		WithKeyFrom(testAccAddressBech), // must match mnemonic above
 	)
 	requireT.NoError(err)
-	requireT.Equal("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2", accAddr.String())
+	requireT.Equal(testAccAddressBech, accAddr.String())
 
 	info, err := kb.KeyByAddress(accAddr)
 	requireT.NoError(err)
@@ -86,16 +86,16 @@ func (s *KeyringTestSuite) TestKeyringFile() {
 		WithKeyPassphrase("test12345678"),
 	)
 	requireT.NoError(err)
-	requireT.Equal("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2", accAddr.String())
+	requireT.Equal(testAccAddressBech, accAddr.String())
 
 	accAddr, kb, err := NewCosmosKeyring(
 		WithKeyringBackend(BackendFile),
 		WithKeyringDir("./testdata"),
-		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"),
+		WithKeyFrom(testAccAddressBech),
 		WithKeyPassphrase("test12345678"),
 	)
 	requireT.NoError(err)
-	requireT.Equal("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2", accAddr.String())
+	requireT.Equal(testAccAddressBech, accAddr.String())
 
 	info, err := kb.KeyByAddress(accAddr)
 	requireT.NoError(err)
@@ -152,7 +152,7 @@ func (s *KeyringTestSuite) TestKeyringOsWithAppName() {
 		WithKeyringAppName("keyring_test"),
 	)
 	requireT.NoError(err)
-	requireT.Equal("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2", accAddr.String())
+	requireT.Equal(testAccAddressBech, accAddr.String())
 
 	info, err := kb.KeyByAddress(accAddr)
 	requireT.NoError(err)
@@ -184,7 +184,9 @@ func (s *KeyringTestSuite) TestUseFromAsName() {
 	requireT.NoError(err)
 }
 
-var testAccAddress, _ = sdk.AccAddressFromBech32("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2")
+const testAccAddressBech = "persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"
+
+var testAccAddress, _ = sdk.AccAddressFromBech32(testAccAddressBech)
 
 //nolint:lll // mnemonic fixture
 const testMnemonic = `toddler gossip soap crop property true off record horn route enable raise produce wheat mango social output ritual pond powder test biology address romance`
