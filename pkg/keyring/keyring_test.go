@@ -2,7 +2,6 @@ package keyring
 
 import (
 	"encoding/hex"
-	"os"
 	"testing"
 
 	cosmcrypto "github.com/cosmos/cosmos-sdk/crypto"
@@ -10,6 +9,7 @@ import (
 	cosmkeyring "github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
 var (
@@ -17,17 +17,23 @@ var (
 	CoinType         = 118
 )
 
-func TestMain(m *testing.M) {
-	setCoinTypeAndPrefix(uint32(CoinType), Bech32MainPrefix)
-
-	os.Exit(m.Run())
+type KeyringTestSuite struct {
+	suite.Suite
 }
 
-func TestKeyFromPrivkey(t *testing.T) {
-	requireT := require.New(t)
+func TestKeyringTestSuite(t *testing.T) {
+	suite.Run(t, new(KeyringTestSuite))
+}
+
+func (s *KeyringTestSuite) SetupTest() {
+	setCoinTypeAndPrefix(uint32(CoinType), Bech32MainPrefix)
+}
+
+func (s *KeyringTestSuite) TestKeyFromPrivkey() {
+	requireT := s.Require()
 
 	accAddr, kb, err := NewCosmosKeyring(
-		WithPrivKeyHex("2bcc4aa9d2374a80169fa7568ea221133a96288bd13a499abfa110dd0f0c55bd"),
+		WithPrivKeyHex(testPrivKeyHex),
 		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"), // must match the privkey above
 	)
 	requireT.NoError(err)
@@ -38,7 +44,7 @@ func TestKeyFromPrivkey(t *testing.T) {
 	requireT.Equal(cosmkeyring.TypeLocal, info.GetType())
 	requireT.Equal(hd.Secp256k1Type, info.GetAlgo())
 
-	logPrivKey(t, kb, accAddr)
+	logPrivKey(s.T(), kb, accAddr)
 
 	res, pubkey, err := kb.SignByAddress(accAddr, []byte("test"))
 	requireT.NoError(err)
@@ -46,13 +52,13 @@ func TestKeyFromPrivkey(t *testing.T) {
 	requireT.Equal(testSig, res)
 }
 
-func TestKeyFromMnemonic(t *testing.T) {
-	requireT := require.New(t)
+func (s *KeyringTestSuite) TestKeyFromMnemonic() {
+	requireT := s.Require()
 
 	accAddr, kb, err := NewCosmosKeyring(
-		WithMnemonic("toddler gossip soap crop property true off record horn route enable raise produce wheat mango social output ritual pond powder test biology address romance"),
-		WithPrivKeyHex("2bcc4aa9d2374a80169fa7568ea221133a96288bd13a499abfa110dd0f0c55bd"), // must match mnemonic above
-		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"),                  // must match mnemonic above
+		WithMnemonic(testMnemonic),
+		WithPrivKeyHex(testPrivKeyHex),                                    // must match mnemonic above
+		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"), // must match mnemonic above
 	)
 	requireT.NoError(err)
 	requireT.Equal("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2", accAddr.String())
@@ -62,7 +68,7 @@ func TestKeyFromMnemonic(t *testing.T) {
 	requireT.Equal(cosmkeyring.TypeLocal, info.GetType())
 	requireT.Equal(hd.Secp256k1Type, info.GetAlgo())
 
-	logPrivKey(t, kb, accAddr)
+	logPrivKey(s.T(), kb, accAddr)
 
 	res, pubkey, err := kb.SignByAddress(accAddr, []byte("test"))
 	requireT.NoError(err)
@@ -70,13 +76,22 @@ func TestKeyFromMnemonic(t *testing.T) {
 	requireT.Equal(testSig, res)
 }
 
-func TestKeyringFile(t *testing.T) {
-	requireT := require.New(t)
+func (s *KeyringTestSuite) TestKeyringFile() {
+	requireT := s.Require()
+
+	accAddr, _, err := NewCosmosKeyring(
+		WithKeyringBackend(BackendFile),
+		WithKeyringDir("./testdata"),
+		WithKeyFrom("test"),
+		WithKeyPassphrase("test12345678"),
+	)
+	requireT.NoError(err)
+	requireT.Equal("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2", accAddr.String())
 
 	accAddr, kb, err := NewCosmosKeyring(
 		WithKeyringBackend(BackendFile),
 		WithKeyringDir("./testdata"),
-		WithKeyFrom("test"),
+		WithKeyFrom("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"),
 		WithKeyPassphrase("test12345678"),
 	)
 	requireT.NoError(err)
@@ -88,13 +103,93 @@ func TestKeyringFile(t *testing.T) {
 	requireT.Equal(hd.Secp256k1Type, info.GetAlgo())
 	requireT.Equal("test", info.GetName())
 
-	logPrivKey(t, kb, accAddr)
+	logPrivKey(s.T(), kb, accAddr)
 
 	res, pubkey, err := kb.SignByAddress(accAddr, []byte("test"))
 	requireT.NoError(err)
 	requireT.Equal(info.GetPubKey(), pubkey)
 	requireT.Equal(testSig, res)
 }
+
+func (s *KeyringTestSuite) TestKeyringOsWithAppName() {
+	if testing.Short() {
+		s.T().Skip("skipping testing in short mode")
+		return
+	}
+
+	requireT := require.New(s.T())
+
+	osKeyring, err := cosmkeyring.New(
+		"keyring_test",
+		cosmkeyring.BackendOS,
+		"",
+		nil,
+	)
+	requireT.NoError(err)
+
+	var accInfo cosmkeyring.Info
+	if accInfo, err = osKeyring.Key("test"); err != nil {
+		accInfo, err = osKeyring.NewAccount(
+			"test",
+			testMnemonic,
+			cosmkeyring.DefaultBIP39Passphrase,
+			sdk.GetConfig().GetFullBIP44Path(),
+			hd.Secp256k1,
+		)
+
+		requireT.NoError(err)
+		requireT.Equal(testAccAddress.String(), accInfo.GetAddress().String())
+	}
+
+	s.T().Cleanup(func() {
+		// cleanup
+		_ = osKeyring.DeleteByAddress(accInfo.GetAddress())
+	})
+
+	accAddr, kb, err := NewCosmosKeyring(
+		WithKeyringBackend(BackendOS),
+		WithKeyFrom("test"),
+		WithKeyringAppName("keyring_test"),
+	)
+	requireT.NoError(err)
+	requireT.Equal("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2", accAddr.String())
+
+	info, err := kb.KeyByAddress(accAddr)
+	requireT.NoError(err)
+	requireT.Equal(cosmkeyring.TypeLocal, info.GetType())
+	requireT.Equal(hd.Secp256k1Type, info.GetAlgo())
+	requireT.Equal("test", info.GetName())
+
+	res, pubkey, err := kb.SignByAddress(accAddr, []byte("test"))
+	requireT.NoError(err)
+	requireT.Equal(info.GetPubKey(), pubkey)
+	requireT.Equal(testSig, res)
+}
+
+func (s *KeyringTestSuite) TestUseFromAsName() {
+	requireT := s.Require()
+
+	_, _, err := NewCosmosKeyring(
+		WithPrivKeyHex(testPrivKeyHex),
+		WithKeyFrom("kowabunga"),
+	)
+
+	requireT.NoError(err)
+
+	_, _, err = NewCosmosKeyring(
+		WithMnemonic(testMnemonic),
+		WithKeyFrom("kowabunga"),
+	)
+
+	requireT.NoError(err)
+}
+
+var testAccAddress, _ = sdk.AccAddressFromBech32("persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2")
+
+//nolint:lll // mnemonic fixture
+const testMnemonic = `toddler gossip soap crop property true off record horn route enable raise produce wheat mango social output ritual pond powder test biology address romance`
+
+var testPrivKeyHex = "2bcc4aa9d2374a80169fa7568ea221133a96288bd13a499abfa110dd0f0c55bd"
 
 var testSig = []byte{
 	0xcf, 0xbe, 0x24, 0xb7, 0xd9, 0xbb, 0xaf, 0x60,
@@ -113,7 +208,7 @@ func logPrivKey(t *testing.T, kb cosmkeyring.Keyring, accAddr sdk.AccAddress) {
 	t.Log("[PRIV]", hex.EncodeToString(privKey.Bytes()))
 }
 
-// setCoinTypeAndPrefix sets the chain coin type and account bech32 prefixes in global config for the current process
+// setCoinTypeAndPrefix sets the chain coin type and account bech32 prefixes in global config for the current process.
 func setCoinTypeAndPrefix(coinType uint32, accountAddressPrefix string) {
 	var (
 		Bech32PrefixAccAddr  = accountAddressPrefix
@@ -130,5 +225,4 @@ func setCoinTypeAndPrefix(coinType uint32, accountAddressPrefix string) {
 	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
 	config.SetCoinType(coinType)
 	config.SetPurpose(44)
-	config.Seal()
 }

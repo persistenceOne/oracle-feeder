@@ -339,27 +339,27 @@ func (candle *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	}
 
 	// timestamps come as a float string
-	time, ok := tmp[1].(string)
+	candleTime, ok := tmp[1].(string)
 	if !ok {
-		return fmt.Errorf("time field must be a string")
+		return fmt.Errorf("candle time field must be a string")
 	}
-	timeFloat, err := strconv.ParseFloat(time, 64)
+	candleTimeFloat, err := strconv.ParseFloat(candleTime, 64)
 	if err != nil {
 		return fmt.Errorf("unable to convert time to float")
 	}
-	candle.TimeStamp = int64(timeFloat)
+	candle.TimeStamp = int64(candleTimeFloat)
 
-	close, ok := tmp[5].(string)
+	candleClose, ok := tmp[5].(string)
 	if !ok {
-		return fmt.Errorf("close field must be a string")
+		return fmt.Errorf("candle close field must be a string")
 	}
-	candle.Close = close
+	candle.Close = candleClose
 
-	volume, ok := tmp[7].(string)
+	candleVolume, ok := tmp[7].(string)
 	if !ok {
-		return fmt.Errorf("volume field must be a string")
+		return fmt.Errorf("candle volume field must be a string")
 	}
-	candle.Volume = volume
+	candle.Volume = candleVolume
 
 	return nil
 }

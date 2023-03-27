@@ -1,9 +1,7 @@
 package client
 
 import (
-	"bytes"
 	"context"
-	"io"
 	"os"
 	"time"
 
@@ -20,9 +18,10 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
-	"github.com/persistenceOne/oracle-feeder/pkg/keyring"
 	"github.com/persistenceOne/persistence-sdk/v2/simapp"
 	simparams "github.com/persistenceOne/persistence-sdk/v2/simapp/params"
+
+	"github.com/persistenceOne/oracle-feeder/pkg/keyring"
 )
 
 const (
@@ -49,13 +48,9 @@ type (
 		ChainHeight         *ChainHeight
 		Fees                string
 	}
-
-	passReader struct {
-		pass string
-		buf  *bytes.Buffer
-	}
 )
 
+//nolint:funlen // the func is just mapping of params mostly
 func NewOracleClient(
 	ctx context.Context,
 	logger zerolog.Logger,
@@ -123,24 +118,6 @@ func NewOracleClient(
 	oracleClient.ChainHeight = chainHeight
 
 	return oracleClient, nil
-}
-
-func newPassReader(pass string) io.Reader {
-	return &passReader{
-		pass: pass,
-		buf:  new(bytes.Buffer),
-	}
-}
-
-func (r *passReader) Read(p []byte) (n int, err error) {
-	n, err = r.buf.Read(p)
-	if err == io.EOF || n == 0 {
-		r.buf.WriteString(r.pass + "\n")
-
-		n, err = r.buf.Read(p)
-	}
-
-	return n, err
 }
 
 // BroadcastTx attempts to broadcast a signed transaction. If it fails, a few re-attempts
