@@ -44,13 +44,14 @@ providers = [
 quote = "USD"
 
 [account]
-address = "persistence1fk57xyyxz89krc3nn5law2xekan84gufzagszw"
-chain_id = "testing"
-validator = "persistencevaloper1fk57xyyxz89krc3nn5law2xekan84guftegdth"
+address = "persistence1pkkayn066msg6kn33wnl5srhdt3tnu2vv3k3tu"
+chain_id = "test"
+validator = "persistencevaloper1pkkayn066msg6kn33wnl5srhdt3tnu2v94kvz9"
 
 [keyring]
-backend = "test"
-dir = "/tmp/trash/.persistenceCore"
+# backend = "test"
+# dir = "/tmp/trash/.persistenceCore"
+mnemonic = "wage thunder live sense resemble foil apple course spin horse glass mansion midnight laundry acoustic rhythm loan scale talent push green direct brick please"
 
 [rpc]
 grpc_endpoint = "localhost:9090"

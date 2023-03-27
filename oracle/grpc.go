@@ -10,7 +10,7 @@ const (
 	protocolStr = "tcp"
 )
 
-func dialerFunc(ctx context.Context, addr string) (net.Conn, error) {
+func dialerFunc(_ context.Context, addr string) (net.Conn, error) {
 	return connect(addr)
 }
 

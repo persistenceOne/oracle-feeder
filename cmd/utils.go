@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -9,18 +8,17 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/persistenceOne/persistenceCore/v7/app"
-
-	"github.com/cosmos/cosmos-sdk/client/input"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
+
+	"github.com/persistenceOne/persistenceCore/v7/app"
 )
 
 const (
 	logLevelJSON = "json"
 	logLevelText = "text"
 
-	envPriceFeederPass = "PRICE_FEEDER_KEY_PASS"
+	envPriceFeederPass = "ORACLE_FEEDER_KEY_PASSPHRASE" // #nosec G101
 )
 
 // setConfig params at the package state.
@@ -54,17 +52,6 @@ func setUpLogger(logLevel string, logFormat string) (zerolog.Logger, error) {
 	}
 
 	return zerolog.New(logWriter).Level(logLvl).With().Timestamp().Logger(), nil
-}
-
-func getKeyringPassword() (string, error) {
-	reader := bufio.NewReader(os.Stdin)
-
-	pass := os.Getenv(envPriceFeederPass)
-	if pass == "" {
-		return input.GetString("Enter keyring password", reader)
-	}
-
-	return pass, nil
 }
 
 // trapSignal will listen for any OS signal and invoke Done on the main
