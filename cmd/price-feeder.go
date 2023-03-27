@@ -93,10 +93,10 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to parse RPC timeout: %w", err)
 	}
 
-	// Gather pass via env variable || std input
-	keyringPass, err := getKeyringPassword()
-	if err != nil {
-		return err
+	// env variable precedes the config value
+	keyringPass := os.Getenv(envPriceFeederPass)
+	if len(keyringPass) == 0 {
+		keyringPass = cfg.Keyring.Passphrase
 	}
 
 	oracleClient, err := client.NewOracleClient(
@@ -106,6 +106,8 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		cfg.Keyring.Backend,
 		cfg.Keyring.Dir,
 		keyringPass,
+		cfg.Keyring.PrivKeyHex,
+		cfg.Keyring.Mnemonic,
 		cfg.RPC.TMRPCEndpoint,
 		timeout,
 		cfg.Account.Address,

@@ -9,18 +9,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/persistenceOne/persistenceCore/v7/app"
-
 	"github.com/cosmos/cosmos-sdk/client/input"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
+
+	"github.com/persistenceOne/persistenceCore/v7/app"
 )
 
 const (
 	logLevelJSON = "json"
 	logLevelText = "text"
 
-	envPriceFeederPass = "PRICE_FEEDER_KEY_PASS"
+	envPriceFeederPass = "ORACLE_FEEDER_KEY_PASSPHRASE"
 )
 
 // setConfig params at the package state.

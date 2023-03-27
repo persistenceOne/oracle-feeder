@@ -103,9 +103,13 @@ type (
 	}
 
 	// Keyring defines the required persistenceOne keyring configuration.
+	// If privkey hex or mnemonic provided, it must match with account address.
 	Keyring struct {
-		Backend string `mapstructure:"backend" validate:"required"`
-		Dir     string `mapstructure:"dir" validate:"required"`
+		Dir        string `mapstructure:"dir"`
+		Backend    string `mapstructure:"backend"`
+		Passphrase string `mapstructure:"passphrase"`
+		PrivKeyHex string `mapstructure:"priv_key_hex"`
+		Mnemonic   string `mapstructure:"mnemonic"`
 	}
 
 	// RPC defines RPC configuration of both the persistenceOne gRPC and Tendermint nodes.

@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"context"
-	"errors"
 	"io"
 	"os"
 	"time"
@@ -12,14 +11,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	rpcclient "github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	cosmkeyring "github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
+	"github.com/persistenceOne/oracle-feeder/pkg/keyring"
 	"github.com/persistenceOne/persistence-sdk/v2/simapp"
 	simparams "github.com/persistenceOne/persistence-sdk/v2/simapp/params"
 )
@@ -35,19 +36,16 @@ type (
 	OracleClient struct {
 		Logger              zerolog.Logger
 		ChainID             string
-		KeyringBackend      string
-		KeyringDir          string
-		KeyringPass         string
 		TMRPC               string
 		RPCTimeout          time.Duration
 		OracleAddr          sdk.AccAddress
 		OracleAddrString    string
+		Keyring             cosmkeyring.Keyring
 		ValidatorAddrString string
 		Encoding            simparams.EncodingConfig
 		GasPrices           string
 		GasAdjustment       float64
 		GRPCEndpoint        string
-		KeyringPassphrase   string
 		ChainHeight         *ChainHeight
 		Fees                string
 	}
@@ -65,6 +63,8 @@ func NewOracleClient(
 	keyringBackend string,
 	keyringDir string,
 	keyringPass string,
+	keyPrivHex string,
+	keyMnemonic string,
 	tmRPC string,
 	rpcTimeout time.Duration,
 	oracleAddrString string,
@@ -73,21 +73,27 @@ func NewOracleClient(
 	gasAdjustment float64,
 	fees string,
 ) (OracleClient, error) {
-	oracleAddr, err := sdk.AccAddressFromBech32(oracleAddrString)
+	oracleAddr, kb, err := keyring.NewCosmosKeyring(
+		keyring.WithKeyringDir(keyringDir),
+		keyring.WithKeyPassphrase(keyringPass),
+		keyring.WithKeyringBackend(keyring.Backend(keyringBackend)),
+		keyring.WithKeyFrom(oracleAddrString),
+		keyring.WithPrivKeyHex(keyPrivHex),
+		keyring.WithMnemonic(keyMnemonic),
+	)
 	if err != nil {
+		err = errors.Wrap(err, "failed to initialize client keyring")
 		return OracleClient{}, err
 	}
 
 	oracleClient := OracleClient{
 		Logger:              logger.With().Str("module", "oracle_client").Logger(),
 		ChainID:             chainID,
-		KeyringBackend:      keyringBackend,
-		KeyringDir:          keyringDir,
-		KeyringPass:         keyringPass,
 		TMRPC:               tmRPC,
 		RPCTimeout:          rpcTimeout,
 		OracleAddr:          oracleAddr,
 		OracleAddrString:    oracleAddrString,
+		Keyring:             kb,
 		ValidatorAddrString: validatorAddrString,
 		Encoding:            simapp.MakeTestEncodingConfig(),
 		GasAdjustment:       gasAdjustment,
@@ -205,18 +211,6 @@ func (oc OracleClient) BroadcastTx(ctx context.Context, nextBlockHeight, timeout
 // createClientContext creates an SDK client Context instance used for transaction
 // generation, signing and broadcasting.
 func (oc OracleClient) createClientContext() (client.Context, error) {
-	var keyringInput io.Reader
-	if len(oc.KeyringPass) > 0 {
-		keyringInput = newPassReader(oc.KeyringPass)
-	} else {
-		keyringInput = os.Stdin
-	}
-
-	kr, err := keyring.New(oracleAppName, oc.KeyringBackend, oc.KeyringDir, keyringInput)
-	if err != nil {
-		return client.Context{}, err
-	}
-
 	httpClient, err := tmjsonclient.DefaultHTTPClient(oc.TMRPC)
 	if err != nil {
 		return client.Context{}, err
@@ -229,10 +223,11 @@ func (oc OracleClient) createClientContext() (client.Context, error) {
 		return client.Context{}, err
 	}
 
-	keyInfo, err := kr.KeyByAddress(oc.OracleAddr)
+	keyInfo, err := oc.Keyring.KeyByAddress(oc.OracleAddr)
 	if err != nil {
 		return client.Context{}, err
 	}
+
 	clientCtx := client.Context{
 		ChainID:           oc.ChainID,
 		InterfaceRegistry: oc.Encoding.InterfaceRegistry,
@@ -245,7 +240,7 @@ func (oc OracleClient) createClientContext() (client.Context, error) {
 		Input:             os.Stdin,
 		NodeURI:           oc.TMRPC,
 		Client:            tmRPC,
-		Keyring:           kr,
+		Keyring:           oc.Keyring,
 		FromAddress:       oc.OracleAddr,
 		FromName:          keyInfo.GetName(),
 		From:              keyInfo.GetName(),
