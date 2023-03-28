@@ -22,6 +22,7 @@ const (
 	Crypto    Name = "crypto"
 	Coinbase  Name = "coinbase"
 	Huobi     Name = "huobi"
+	Mock      Name = "mock"
 )
 
 const (
