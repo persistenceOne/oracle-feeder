@@ -18,8 +18,8 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
-	"github.com/persistenceOne/persistence-sdk/v2/simapp"
-	simparams "github.com/persistenceOne/persistence-sdk/v2/simapp/params"
+	"github.com/persistenceOne/persistenceCore/v8/app"
+	"github.com/persistenceOne/persistenceCore/v8/app/params"
 
 	"github.com/persistenceOne/oracle-feeder/pkg/keyring"
 )
@@ -41,7 +41,7 @@ type (
 		OracleAddrString    string
 		Keyring             cosmkeyring.Keyring
 		ValidatorAddrString string
-		Encoding            simparams.EncodingConfig
+		Encoding            params.EncodingConfig
 		GasPrices           string
 		GasAdjustment       float64
 		GRPCEndpoint        string
@@ -68,7 +68,10 @@ func NewOracleClient(
 	gasAdjustment float64,
 	fees string,
 ) (OracleClient, error) {
+	encodingConfig := app.MakeEncodingConfig()
+
 	oracleAddr, kb, err := keyring.NewCosmosKeyring(
+		encodingConfig.Marshaler,
 		keyring.WithKeyringDir(keyringDir),
 		keyring.WithKeyPassphrase(keyringPass),
 		keyring.WithKeyringBackend(keyring.Backend(keyringBackend)),
@@ -90,7 +93,7 @@ func NewOracleClient(
 		OracleAddrString:    oracleAddrString,
 		Keyring:             kb,
 		ValidatorAddrString: validatorAddrString,
-		Encoding:            simapp.MakeTestEncodingConfig(),
+		Encoding:            encodingConfig,
 		GasAdjustment:       gasAdjustment,
 		GRPCEndpoint:        grpcEndpoint,
 		Fees:                fees,
@@ -210,7 +213,7 @@ func (oc OracleClient) createClientContext() (client.Context, error) {
 		InterfaceRegistry: oc.Encoding.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastSync,
-		TxConfig:          oc.Encoding.TxConfig,
+		TxConfig:          oc.Encoding.TransactionConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
 		Codec:             oc.Encoding.Marshaler,
 		LegacyAmino:       oc.Encoding.Amino,
@@ -219,8 +222,8 @@ func (oc OracleClient) createClientContext() (client.Context, error) {
 		Client:            tmRPC,
 		Keyring:           oc.Keyring,
 		FromAddress:       oc.OracleAddr,
-		FromName:          keyInfo.GetName(),
-		From:              keyInfo.GetName(),
+		FromName:          keyInfo.Name,
+		From:              keyInfo.Name,
 		OutputFormat:      jsonFormat,
 		UseLedger:         false,
 		Simulate:          false,

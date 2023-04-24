@@ -11,7 +11,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 
-	"github.com/persistenceOne/persistenceCore/v7/app"
+	"github.com/persistenceOne/persistenceCore/v8/app"
 )
 
 const (

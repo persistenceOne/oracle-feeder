@@ -4,10 +4,12 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	cosmcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	cosmkeyring "github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/persistenceOne/persistence-sdk/v2/simapp"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -19,6 +21,8 @@ var (
 
 type KeyringTestSuite struct {
 	suite.Suite
+
+	cdc codec.Codec
 }
 
 func TestKeyringTestSuite(t *testing.T) {
@@ -27,28 +31,32 @@ func TestKeyringTestSuite(t *testing.T) {
 
 func (s *KeyringTestSuite) SetupTest() {
 	setCoinTypeAndPrefix(uint32(CoinType), Bech32MainPrefix)
+	s.cdc = simapp.MakeTestEncodingConfig().Marshaler
 }
 
 func (s *KeyringTestSuite) TestKeyFromPrivkey() {
 	requireT := s.Require()
 
 	accAddr, kb, err := NewCosmosKeyring(
+		s.cdc,
 		WithPrivKeyHex(testPrivKeyHex),
 		WithKeyFrom(testAccAddressBech), // must match the privkey above
 	)
 	requireT.NoError(err)
 	requireT.Equal(testAccAddressBech, accAddr.String())
 
-	info, err := kb.KeyByAddress(accAddr)
+	record, err := kb.KeyByAddress(accAddr)
 	requireT.NoError(err)
-	requireT.Equal(cosmkeyring.TypeLocal, info.GetType())
-	requireT.Equal(hd.Secp256k1Type, info.GetAlgo())
+	requireT.Equal(cosmkeyring.TypeLocal, record.GetType())
+	requireT.Equal(expectedPubKeyType, record.PubKey.TypeUrl)
+	recordPubKey, err := record.GetPubKey()
+	requireT.NoError(err)
 
 	logPrivKey(s.T(), kb, accAddr)
 
 	res, pubkey, err := kb.SignByAddress(accAddr, []byte("test"))
 	requireT.NoError(err)
-	requireT.Equal(info.GetPubKey(), pubkey)
+	requireT.EqualValues(recordPubKey, pubkey)
 	requireT.Equal(testSig, res)
 }
 
@@ -56,6 +64,7 @@ func (s *KeyringTestSuite) TestKeyFromMnemonic() {
 	requireT := s.Require()
 
 	accAddr, kb, err := NewCosmosKeyring(
+		s.cdc,
 		WithMnemonic(testMnemonic),
 		WithPrivKeyHex(testPrivKeyHex),  // must match mnemonic above
 		WithKeyFrom(testAccAddressBech), // must match mnemonic above
@@ -63,16 +72,18 @@ func (s *KeyringTestSuite) TestKeyFromMnemonic() {
 	requireT.NoError(err)
 	requireT.Equal(testAccAddressBech, accAddr.String())
 
-	info, err := kb.KeyByAddress(accAddr)
+	record, err := kb.KeyByAddress(accAddr)
 	requireT.NoError(err)
-	requireT.Equal(cosmkeyring.TypeLocal, info.GetType())
-	requireT.Equal(hd.Secp256k1Type, info.GetAlgo())
+	requireT.Equal(cosmkeyring.TypeLocal, record.GetType())
+	requireT.Equal(expectedPubKeyType, record.PubKey.TypeUrl)
+	recordPubKey, err := record.GetPubKey()
+	requireT.NoError(err)
 
 	logPrivKey(s.T(), kb, accAddr)
 
 	res, pubkey, err := kb.SignByAddress(accAddr, []byte("test"))
 	requireT.NoError(err)
-	requireT.Equal(info.GetPubKey(), pubkey)
+	requireT.Equal(recordPubKey, pubkey)
 	requireT.Equal(testSig, res)
 }
 
@@ -80,6 +91,7 @@ func (s *KeyringTestSuite) TestKeyringFile() {
 	requireT := s.Require()
 
 	accAddr, _, err := NewCosmosKeyring(
+		s.cdc,
 		WithKeyringBackend(BackendFile),
 		WithKeyringDir("./testdata"),
 		WithKeyFrom("test"),
@@ -89,6 +101,7 @@ func (s *KeyringTestSuite) TestKeyringFile() {
 	requireT.Equal(testAccAddressBech, accAddr.String())
 
 	accAddr, kb, err := NewCosmosKeyring(
+		s.cdc,
 		WithKeyringBackend(BackendFile),
 		WithKeyringDir("./testdata"),
 		WithKeyFrom(testAccAddressBech),
@@ -97,17 +110,19 @@ func (s *KeyringTestSuite) TestKeyringFile() {
 	requireT.NoError(err)
 	requireT.Equal(testAccAddressBech, accAddr.String())
 
-	info, err := kb.KeyByAddress(accAddr)
+	record, err := kb.KeyByAddress(accAddr)
 	requireT.NoError(err)
-	requireT.Equal(cosmkeyring.TypeLocal, info.GetType())
-	requireT.Equal(hd.Secp256k1Type, info.GetAlgo())
-	requireT.Equal("test", info.GetName())
+	requireT.Equal(cosmkeyring.TypeLocal, record.GetType())
+	requireT.Equal(expectedPubKeyType, record.PubKey.TypeUrl)
+	requireT.Equal("test", record.Name)
+	recordPubKey, err := record.GetPubKey()
+	requireT.NoError(err)
 
 	logPrivKey(s.T(), kb, accAddr)
 
 	res, pubkey, err := kb.SignByAddress(accAddr, []byte("test"))
 	requireT.NoError(err)
-	requireT.Equal(info.GetPubKey(), pubkey)
+	requireT.Equal(recordPubKey, pubkey)
 	requireT.Equal(testSig, res)
 }
 
@@ -124,12 +139,13 @@ func (s *KeyringTestSuite) TestKeyringOsWithAppName() {
 		cosmkeyring.BackendOS,
 		"",
 		nil,
+		s.cdc,
 	)
 	requireT.NoError(err)
 
-	var accInfo cosmkeyring.Info
-	if accInfo, err = osKeyring.Key("test"); err != nil {
-		accInfo, err = osKeyring.NewAccount(
+	var accRecord *cosmkeyring.Record
+	if accRecord, err = osKeyring.Key("test"); err != nil {
+		accRecord, err = osKeyring.NewAccount(
 			"test",
 			testMnemonic,
 			cosmkeyring.DefaultBIP39Passphrase,
@@ -138,15 +154,22 @@ func (s *KeyringTestSuite) TestKeyringOsWithAppName() {
 		)
 
 		requireT.NoError(err)
-		requireT.Equal(testAccAddress.String(), accInfo.GetAddress().String())
+
+		accAddr, err := accRecord.GetAddress()
+		requireT.NoError(err)
+		requireT.Equal(testAccAddressBech, accAddr.String())
 	}
 
 	s.T().Cleanup(func() {
 		// cleanup
-		_ = osKeyring.DeleteByAddress(accInfo.GetAddress())
+		addr, err := accRecord.GetAddress()
+		if err == nil {
+			_ = osKeyring.DeleteByAddress(addr)
+		}
 	})
 
 	accAddr, kb, err := NewCosmosKeyring(
+		s.cdc,
 		WithKeyringBackend(BackendOS),
 		WithKeyFrom("test"),
 		WithKeyringAppName("keyring_test"),
@@ -154,15 +177,18 @@ func (s *KeyringTestSuite) TestKeyringOsWithAppName() {
 	requireT.NoError(err)
 	requireT.Equal(testAccAddressBech, accAddr.String())
 
-	info, err := kb.KeyByAddress(accAddr)
+	record, err := kb.KeyByAddress(accAddr)
 	requireT.NoError(err)
-	requireT.Equal(cosmkeyring.TypeLocal, info.GetType())
-	requireT.Equal(hd.Secp256k1Type, info.GetAlgo())
-	requireT.Equal("test", info.GetName())
+	requireT.Equal(cosmkeyring.TypeLocal, record.GetType())
+	requireT.Equal(expectedPubKeyType, record.PubKey.TypeUrl)
+	recordPubKey, err := record.GetPubKey()
+	requireT.NoError(err)
+
+	requireT.Equal("test", record.Name)
 
 	res, pubkey, err := kb.SignByAddress(accAddr, []byte("test"))
 	requireT.NoError(err)
-	requireT.Equal(info.GetPubKey(), pubkey)
+	requireT.Equal(recordPubKey, pubkey)
 	requireT.Equal(testSig, res)
 }
 
@@ -170,6 +196,7 @@ func (s *KeyringTestSuite) TestUseFromAsName() {
 	requireT := s.Require()
 
 	_, _, err := NewCosmosKeyring(
+		s.cdc,
 		WithPrivKeyHex(testPrivKeyHex),
 		WithKeyFrom("kowabunga"),
 	)
@@ -177,6 +204,7 @@ func (s *KeyringTestSuite) TestUseFromAsName() {
 	requireT.NoError(err)
 
 	_, _, err = NewCosmosKeyring(
+		s.cdc,
 		WithMnemonic(testMnemonic),
 		WithKeyFrom("kowabunga"),
 	)
@@ -184,9 +212,9 @@ func (s *KeyringTestSuite) TestUseFromAsName() {
 	requireT.NoError(err)
 }
 
-const testAccAddressBech = "persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"
+const expectedPubKeyType = "/cosmos.crypto.secp256k1.PubKey"
 
-var testAccAddress, _ = sdk.AccAddressFromBech32(testAccAddressBech)
+const testAccAddressBech = "persistence1t6dq82wyggtmu2cvegyat9et7uans46n9vfmj2"
 
 //nolint:lll // mnemonic fixture
 const testMnemonic = `toddler gossip soap crop property true off record horn route enable raise produce wheat mango social output ritual pond powder test biology address romance`
