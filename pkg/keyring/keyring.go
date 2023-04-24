@@ -203,13 +203,9 @@ func fromCosmosKeyring(
 		passReader = newPassReader(config.KeyPassphrase)
 	}
 
-	var (
-		absoluteKeyringDir string
-		err                error
-	)
-	if filepath.IsAbs(config.KeyringDir) {
-		absoluteKeyringDir = config.KeyringDir
-	} else {
+	var err error
+	absoluteKeyringDir := config.KeyringDir
+	if !filepath.IsAbs(config.KeyringDir) {
 		absoluteKeyringDir, err = filepath.Abs(config.KeyringDir)
 		if err != nil {
 			err = errors.Wrapf(ErrFilepathIncorrect, "failed to get abs path for keyring dir: %s", err.Error())
@@ -238,11 +234,8 @@ func fromCosmosKeyring(
 
 	if err != nil {
 		err = errors.Wrapf(
-			ErrKeyRecordNotFound,
-			"couldn't find an entry for the key '%s' in keybase: %s",
-			config.KeyFrom,
-			err.Error(),
-		)
+			ErrKeyRecordNotFound, "couldn't find an entry for the key '%s' in keybase: %s",
+			config.KeyFrom, err.Error())
 
 		return emptyCosmosAddress, nil, err
 	}
