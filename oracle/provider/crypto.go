@@ -225,7 +225,7 @@ func (p *CryptoProvider) getTickerPrice(key string) (types.TickerPrice, error) {
 	ticker, ok := p.tickers[key]
 	if !ok {
 		return types.TickerPrice{}, fmt.Errorf(
-			types.ErrTickerNotFound.Error(),
+			types.ErrTickerNotFound,
 			Crypto,
 			key,
 		)
@@ -241,7 +241,7 @@ func (p *CryptoProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 	candles, ok := p.candles[key]
 	if !ok {
 		return []types.CandlePrice{}, fmt.Errorf(
-			types.ErrCandleNotFound.Error(),
+			types.ErrCandleNotFound,
 			Crypto,
 			key,
 		)

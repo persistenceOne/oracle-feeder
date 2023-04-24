@@ -134,13 +134,7 @@ func (s *KeyringTestSuite) TestKeyringOsWithAppName() {
 
 	requireT := require.New(s.T())
 
-	osKeyring, err := cosmkeyring.New(
-		"keyring_test",
-		cosmkeyring.BackendOS,
-		"",
-		nil,
-		s.cdc,
-	)
+	osKeyring, err := cosmkeyring.New("keyring_test", cosmkeyring.BackendOS, "", nil, s.cdc)
 	requireT.NoError(err)
 
 	var accRecord *cosmkeyring.Record

@@ -109,7 +109,7 @@ func (wsc *WebsocketController) connect() error {
 	wsc.logger.Debug().Msg("connecting to websocket")
 	conn, resp, err := websocket.DefaultDialer.Dial(wsc.url.String(), nil)
 	if err != nil {
-		return fmt.Errorf(types.ErrWebsocketDial.Error(), wsc.providerName, err)
+		return fmt.Errorf(types.ErrWebsocketDial, wsc.providerName, err)
 	}
 	defer resp.Body.Close()
 	wsc.client = conn
@@ -134,7 +134,7 @@ func (wsc *WebsocketController) subscribe(msgs []interface{}) error {
 		Msg("websocket subscribed currency_pairs")
 	for _, jsonMessage := range msgs {
 		if err := wsc.SendJSON(jsonMessage); err != nil {
-			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
+			return fmt.Errorf(types.ErrWebsocketSend, wsc.providerName, err)
 		}
 	}
 	return nil
@@ -161,7 +161,7 @@ func (wsc *WebsocketController) SendJSON(msg interface{}) error {
 	}
 	wsc.logger.Debug().Interface("msg", msg).Msg("sending websocket message")
 	if err := wsc.client.WriteJSON(msg); err != nil {
-		return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
+		return fmt.Errorf(types.ErrWebsocketSend, wsc.providerName, err)
 	}
 	return nil
 }
@@ -197,7 +197,7 @@ func (wsc *WebsocketController) ping() error {
 	}
 	err := wsc.client.WriteMessage(int(wsc.pingMessageType), ping)
 	if err != nil {
-		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()
+		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend, wsc.providerName, err)).Send()
 	}
 	return err
 }
@@ -219,7 +219,7 @@ func (wsc *WebsocketController) readWebSocket() {
 		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := wsc.client.ReadMessage()
 			if err != nil {
-				wsc.logger.Err(fmt.Errorf(types.ErrWebsocketRead.Error(), wsc.providerName, err)).Send()
+				wsc.logger.Err(fmt.Errorf(types.ErrWebsocketRead, wsc.providerName, err)).Send()
 				wsc.reconnect()
 				return
 			}
@@ -249,7 +249,7 @@ func (wsc *WebsocketController) close() {
 	wsc.logger.Debug().Msg("closing websocket")
 	wsc.websocketCancelFunc()
 	if err := wsc.client.Close(); err != nil {
-		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketClose.Error(), wsc.providerName, err)).Send()
+		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketClose, wsc.providerName, err)).Send()
 	}
 	wsc.client = nil
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/tendermint/tendermint/libs/sync"
 )
@@ -106,7 +106,7 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 
 	var listResponse []coinList
 	if err := json.NewDecoder(resp.Body).Decode(&listResponse); err != nil {
-		return sdkerrors.Wrap(err, "failed to decode response body as JSON")
+		return errors.Wrap(err, "failed to decode response body as JSON")
 	}
 
 	for _, coin := range listResponse {
@@ -134,12 +134,12 @@ func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 			coinGeckoTickersEndpoint,
 			pair.Quote))
 		if err != nil {
-			return sdkerrors.Wrapf(err, "failed to query coin gecko api tickers endpoint for %s", pair.Base)
+			return errors.Wrapf(err, "failed to query coin gecko api tickers endpoint for %s", pair.Base)
 		}
 
 		var tickerResponse coinTickerResponse
 		if err = json.NewDecoder(coinGeckoResp.Body).Decode(&tickerResponse); err != nil {
-			return sdkerrors.Wrap(err, "failed to decode response body as JSON")
+			return errors.Wrap(err, "failed to decode response body as JSON")
 		}
 
 		// close the response body.
