@@ -12,7 +12,7 @@ var (
 	ErrIncompatibleOptionsProvided = errors.New("incompatible keyring options provided")
 	ErrInsufficientKeyDetails      = errors.New("insufficient cosmos key details provided")
 	ErrKeyIncompatible             = errors.New("provided key is incompatible with requested config")
-	ErrKeyInfoNotFound             = errors.New("key info not found")
+	ErrKeyRecordNotFound           = errors.New("key record not found")
 	ErrPrivkeyConflict             = errors.New("privkey conflict")
 	ErrUnexpectedAddress           = errors.New("unexpected address")
 )

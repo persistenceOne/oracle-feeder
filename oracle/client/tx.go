@@ -40,7 +40,7 @@ func broadcastTx(
 
 	txf = txf.WithGas(adjusted)
 
-	unsignedTx, err := tx.BuildUnsignedTx(txf, msgs...)
+	unsignedTx, err := txf.BuildUnsignedTx(msgs...)
 	if err != nil {
 		return nil, err
 	}

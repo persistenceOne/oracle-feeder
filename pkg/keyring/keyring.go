@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	cosmcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	cosmkeyring "github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -23,7 +24,7 @@ var (
 )
 
 // NewCosmosKeyring creates a new keyring from a variety of options. See ConfigOpt and related options.
-func NewCosmosKeyring(opts ...ConfigOpt) (sdk.AccAddress, cosmkeyring.Keyring, error) {
+func NewCosmosKeyring(cdc codec.Codec, opts ...ConfigOpt) (sdk.AccAddress, cosmkeyring.Keyring, error) {
 	config := &cosmosKeyringConfig{}
 	for optIdx, optFn := range opts {
 		if err := optFn(config); err != nil {
@@ -39,7 +40,7 @@ func NewCosmosKeyring(opts ...ConfigOpt) (sdk.AccAddress, cosmkeyring.Keyring, e
 			return emptyCosmosAddress, nil, err
 		}
 
-		return fromMnemonic(config, config.Mnemonic)
+		return fromMnemonic(cdc, config, config.Mnemonic)
 
 	case len(config.PrivKeyHex) > 0:
 		if config.UseLedger {
@@ -47,7 +48,7 @@ func NewCosmosKeyring(opts ...ConfigOpt) (sdk.AccAddress, cosmkeyring.Keyring, e
 			return emptyCosmosAddress, nil, err
 		}
 
-		return fromPrivkeyHex(config, config.PrivKeyHex)
+		return fromPrivkeyHex(cdc, config, config.PrivKeyHex)
 
 	case len(config.KeyFrom) > 0:
 		var fromIsAddress bool
@@ -57,7 +58,7 @@ func NewCosmosKeyring(opts ...ConfigOpt) (sdk.AccAddress, cosmkeyring.Keyring, e
 			fromIsAddress = true
 		}
 
-		return fromCosmosKeyring(config, addressFrom, fromIsAddress)
+		return fromCosmosKeyring(cdc, config, addressFrom, fromIsAddress)
 
 	default:
 		return emptyCosmosAddress, nil, errors.WithStack(ErrInsufficientKeyDetails)
@@ -65,6 +66,7 @@ func NewCosmosKeyring(opts ...ConfigOpt) (sdk.AccAddress, cosmkeyring.Keyring, e
 }
 
 func fromPrivkeyHex(
+	cdc codec.Codec,
 	config *cosmosKeyringConfig,
 	privkeyHex string,
 ) (sdk.AccAddress, cosmkeyring.Keyring, error) {
@@ -103,7 +105,7 @@ func fromPrivkeyHex(
 	}
 
 	// wrap a PK into a Keyring
-	kb, err := newFromPrivKey(keyName, cosmosAccPk)
+	kb, err := newFromPrivKey(cdc, keyName, cosmosAccPk)
 	if err != nil {
 		err = errors.WithStack(err)
 	}
@@ -112,6 +114,7 @@ func fromPrivkeyHex(
 }
 
 func fromMnemonic(
+	cdc codec.Codec,
 	config *cosmosKeyringConfig,
 	mnemonic string,
 ) (sdk.AccAddress, cosmkeyring.Keyring, error) {
@@ -163,7 +166,7 @@ func fromMnemonic(
 	}
 
 	// wrap a PK into a Keyring
-	kb, err := newFromPrivKey(keyName, cosmosAccPk)
+	kb, err := newFromPrivKey(cdc, keyName, cosmosAccPk)
 	if err != nil {
 		err = errors.WithStack(err)
 	}
@@ -190,6 +193,7 @@ func checkPrivkeyHexMatchesMnemonic(pkHex string, mnemonicDerivedPkBytes []byte)
 }
 
 func fromCosmosKeyring(
+	cdc codec.Codec,
 	config *cosmosKeyringConfig,
 	fromAddress sdk.AccAddress,
 	fromIsAddress bool,
@@ -218,22 +222,23 @@ func fromCosmosKeyring(
 		string(config.KeyringBackend),
 		absoluteKeyringDir,
 		passReader,
+		cdc,
 	)
 	if err != nil {
 		err = errors.Wrapf(ErrCosmosKeyringCreationFailed, "failed to init cosmos keyring: %s", err.Error())
 		return emptyCosmosAddress, nil, err
 	}
 
-	var keyInfo cosmkeyring.Info
+	var keyRecord *cosmkeyring.Record
 	if fromIsAddress {
-		keyInfo, err = kb.KeyByAddress(fromAddress)
+		keyRecord, err = kb.KeyByAddress(fromAddress)
 	} else {
-		keyInfo, err = kb.Key(config.KeyFrom)
+		keyRecord, err = kb.Key(config.KeyFrom)
 	}
 
 	if err != nil {
 		err = errors.Wrapf(
-			ErrKeyInfoNotFound,
+			ErrKeyRecordNotFound,
 			"couldn't find an entry for the key '%s' in keybase: %s",
 			config.KeyFrom,
 			err.Error(),
@@ -242,18 +247,23 @@ func fromCosmosKeyring(
 		return emptyCosmosAddress, nil, err
 	}
 
-	if err := checkKeyInfo(config, keyInfo); err != nil {
+	if err := checkKeyRecord(config, keyRecord); err != nil {
 		return emptyCosmosAddress, nil, err
 	}
 
-	return keyInfo.GetAddress(), kb, nil
+	addr, err := keyRecord.GetAddress()
+	if err != nil {
+		return emptyCosmosAddress, nil, err
+	}
+
+	return addr, kb, nil
 }
 
-func checkKeyInfo(
+func checkKeyRecord(
 	config *cosmosKeyringConfig,
-	keyInfo cosmkeyring.Info,
+	keyRecord *cosmkeyring.Record,
 ) error {
-	switch keyType := keyInfo.GetType(); keyType {
+	switch keyType := keyRecord.GetType(); keyType {
 	case cosmkeyring.TypeLocal:
 		// kb has a key and it's totally usable
 		return nil
@@ -267,7 +277,7 @@ func checkKeyInfo(
 		err := errors.Wrapf(
 			ErrKeyIncompatible,
 			"'%s' key is a ledger reference, enable ledger option",
-			keyInfo.GetName(),
+			keyRecord.Name,
 		)
 		return err
 
@@ -275,7 +285,7 @@ func checkKeyInfo(
 		err := errors.Wrapf(
 			ErrKeyIncompatible,
 			"'%s' key is an offline key, not supported yet",
-			keyInfo.GetName(),
+			keyRecord.Name,
 		)
 		return err
 
@@ -283,7 +293,7 @@ func checkKeyInfo(
 		err := errors.Wrapf(
 			ErrKeyIncompatible,
 			"'%s' key is an multisig key, not supported yet",
-			keyInfo.GetName(),
+			keyRecord.Name,
 		)
 		return err
 
@@ -291,7 +301,7 @@ func checkKeyInfo(
 		err := errors.Wrapf(
 			ErrKeyIncompatible,
 			"'%s' key  has unsupported type: %s",
-			keyInfo.GetName(), keyType,
+			keyRecord.Name, keyType,
 		)
 		return err
 	}
@@ -324,8 +334,8 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 
 // newFromPrivKey creates a temporary in-mem keyring for a PrivKey.
 // Allows to init Context when the key has been provided in plaintext and parsed.
-func newFromPrivKey(name string, privKey cryptotypes.PrivKey) (cosmkeyring.Keyring, error) {
-	kb := cosmkeyring.NewInMemory()
+func newFromPrivKey(cdc codec.Codec, name string, privKey cryptotypes.PrivKey) (cosmkeyring.Keyring, error) {
+	kb := cosmkeyring.NewInMemory(cdc)
 	tmpPhrase := randPhrase(64)
 	armored := cosmcrypto.EncryptArmorPrivKey(privKey, tmpPhrase, privKey.Type())
 	err := kb.ImportPrivKey(name, armored, tmpPhrase)
